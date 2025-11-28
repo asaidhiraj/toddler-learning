@@ -18,6 +18,29 @@ export default function Home() {
   const [windowSize, setWindowSize] = useState({ width: 0, height: 0 });
   const [isSpeaking, setIsSpeaking] = useState(false);
   const speechSynthesisRef = useRef(null);
+  const [stickers, setStickers] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('toddlerAppStickers');
+      return saved ? JSON.parse(saved) : [];
+    }
+    return [];
+  });
+  const [totalStars, setTotalStars] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('toddlerAppTotalStars');
+      return saved ? parseInt(saved) || 0 : 0;
+    }
+    return 0;
+  });
+  const [gamesPlayed, setGamesPlayed] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('toddlerAppGamesPlayed');
+      return saved ? JSON.parse(saved) : {};
+    }
+    return {};
+  });
+  const [showParentMode, setShowParentMode] = useState(false);
+  const [showHint, setShowHint] = useState(false);
 
   const WIN_CONDITION = 5; // He needs 5 right answers to get the big reward
 
@@ -71,13 +94,20 @@ export default function Home() {
     }
   }, []);
 
-  // Auto-speak when question changes for math/alphabet modules
+  // Auto-speak when question changes for math/alphabet/simple_addition modules
   useEffect(() => {
     if (questionQueue.length > 0 && category) {
       const currentQ = questionQueue[0];
-      if (currentQ.speakText && (category === 'math_numbers' || category === 'alphabet')) {
+      if (currentQ.speakText && (category === 'math_numbers' || category === 'alphabet' || category === 'simple_addition')) {
         const timer = setTimeout(() => {
           speakText(currentQ.speakText);
+        }, 300);
+        return () => clearTimeout(timer);
+      }
+      // Play animal sound if available
+      if (currentQ.sound && category === 'animals') {
+        const timer = setTimeout(() => {
+          playAnimalSound(currentQ.sound);
         }, 300);
         return () => clearTimeout(timer);
       }
@@ -92,6 +122,15 @@ export default function Home() {
       }
     };
   }, []);
+
+  // Save stickers to localStorage
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('toddlerAppStickers', JSON.stringify(stickers));
+      localStorage.setItem('toddlerAppTotalStars', totalStars.toString());
+      localStorage.setItem('toddlerAppGamesPlayed', JSON.stringify(gamesPlayed));
+    }
+  }, [stickers, totalStars, gamesPlayed]);
 
   // --- AUDIO ENGINE ---
   const playSound = (type) => {
@@ -139,6 +178,53 @@ export default function Home() {
         gn.gain.exponentialRampToValueAtTime(0.001, now + i * 0.15 + 0.4);
         osc.stop(now + i * 0.15 + 0.4);
       });
+    } else if (type === 'pop') {
+      // Pop sound
+      oscillator.type = 'sine';
+      oscillator.frequency.setValueAtTime(800, audioCtx.currentTime);
+      oscillator.frequency.exponentialRampToValueAtTime(200, audioCtx.currentTime + 0.1);
+      gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+      oscillator.start();
+      oscillator.stop(audioCtx.currentTime + 0.1);
+    } else if (type === 'whoosh') {
+      // Whoosh sound
+      oscillator.type = 'sawtooth';
+      oscillator.frequency.setValueAtTime(200, audioCtx.currentTime);
+      oscillator.frequency.exponentialRampToValueAtTime(50, audioCtx.currentTime + 0.2);
+      gainNode.gain.setValueAtTime(0.2, audioCtx.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.2);
+      oscillator.start();
+      oscillator.stop(audioCtx.currentTime + 0.2);
+    }
+  };
+
+  // Animal sounds (simple tone approximations)
+  const playAnimalSound = (animal) => {
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const sounds = {
+      moo: { freq: 150, duration: 0.4 },
+      woof: { freq: 200, duration: 0.2 },
+      meow: { freq: 400, duration: 0.3 },
+      quack: { freq: 300, duration: 0.2 },
+      roar: { freq: 100, duration: 0.5 },
+      oink: { freq: 180, duration: 0.3 },
+      baa: { freq: 250, duration: 0.4 },
+      neigh: { freq: 350, duration: 0.4 }
+    };
+    
+    const sound = sounds[animal];
+    if (sound) {
+      const oscillator = audioCtx.createOscillator();
+      const gainNode = audioCtx.createGain();
+      oscillator.connect(gainNode);
+      gainNode.connect(audioCtx.destination);
+      oscillator.type = 'sawtooth';
+      oscillator.frequency.value = sound.freq;
+      gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + sound.duration);
+      oscillator.start();
+      oscillator.stop(audioCtx.currentTime + sound.duration);
     }
   };
 
@@ -154,18 +240,33 @@ export default function Home() {
   const handleAnswer = (choice) => {
     const currentQ = questionQueue[0];
     const isCorrect = choice === currentQ.correct;
+    setShowHint(false);
 
     if (isCorrect) {
       playSound('correct');
+      playSound('pop');
       setFeedback('correct');
       const newScore = score + 1;
       setScore(newScore);
+      setTotalStars(prev => prev + 1);
 
       setTimeout(() => {
         setFeedback(null);
         if (newScore >= WIN_CONDITION) {
           setShowReward(true);
           playSound('win');
+          playSound('whoosh');
+          
+          // Award sticker
+          const stickerEmojis = ['⭐', '🌟', '🎉', '🏆', '🎈', '🎊', '🎁', '🎯', '💫', '✨', '🎨', '🎪', '🎭', '🎬', '🎮'];
+          const randomSticker = stickerEmojis[Math.floor(Math.random() * stickerEmojis.length)];
+          setStickers(prev => [...prev, { emoji: randomSticker, category, date: new Date().toISOString() }]);
+          
+          // Track game played
+          setGamesPlayed(prev => ({
+            ...prev,
+            [category]: (prev[category] || 0) + 1
+          }));
         } else {
           // Remove current question and move to next
           setQuestionQueue(prev => prev.slice(1));
@@ -194,7 +295,16 @@ export default function Home() {
       const currentQ = questionQueue[0];
       if (currentQ.speakText) {
         speakText(currentQ.speakText);
+      } else if (currentQ.sound && category === 'animals') {
+        playAnimalSound(currentQ.sound);
       }
+    }
+  };
+
+  const handleShowHint = () => {
+    if (questionQueue.length > 0) {
+      setShowHint(true);
+      playSound('pop');
     }
   };
 
@@ -206,13 +316,23 @@ export default function Home() {
 
   // --- SCREEN: REWARD ---
   if (showReward) {
-    const rewardEmoji = category === 'superhero' ? '🦸' : category === 'math_numbers' ? '🔢' : category === 'alphabet' ? '📚' : '🏆';
+    const rewardEmoji = category === 'superhero' ? '🦸' : category === 'math_numbers' ? '🔢' : category === 'alphabet' ? '📚' : category === 'simple_addition' ? '➕' : '🏆';
+    const latestSticker = stickers[stickers.length - 1];
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-yellow-300 text-center p-4">
+      <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-yellow-300 via-pink-300 to-purple-300 text-center p-4">
         <Confetti width={windowSize.width} height={windowSize.height} numberOfPieces={500} recycle={false} />
         <div className="text-9xl mb-4 animate-bounce">{rewardEmoji}</div>
-        <h1 className="text-6xl font-black text-purple-700 mb-8 drop-shadow-md">YOU DID IT!</h1>
-        <div className="flex gap-4">
+        <h1 className="text-6xl font-black text-purple-700 mb-4 drop-shadow-md">YOU DID IT!</h1>
+        {latestSticker && (
+          <div className="mb-6">
+            <p className="text-3xl font-bold text-purple-800 mb-2">You earned a sticker!</p>
+            <div className="text-8xl animate-pulse">{latestSticker.emoji}</div>
+          </div>
+        )}
+        <div className="mb-4 text-2xl font-bold text-purple-800">
+          Total Stars: {totalStars} ⭐
+        </div>
+        <div className="flex gap-4 flex-wrap justify-center">
           <button 
             onClick={() => startCategory(category)}
             className="px-8 py-4 bg-purple-600 text-white text-2xl rounded-full font-bold shadow-xl border-b-8 border-purple-800 active:border-b-0 active:translate-y-2 transition-all"
@@ -230,10 +350,95 @@ export default function Home() {
     );
   }
 
+  // --- SCREEN: PARENT MODE ---
+  if (showParentMode && !category) {
+    const totalGames = Object.values(gamesPlayed).reduce((sum, count) => sum + count, 0);
+    const favoriteGame = Object.entries(gamesPlayed).sort((a, b) => b[1] - a[1])[0];
+    const categoryNames = {
+      tall_short: 'Tall & Short',
+      big_small: 'Big & Small',
+      colors: 'Colors',
+      counting: 'Counting',
+      fast_slow: 'Fast & Slow',
+      hot_cold: 'Hot & Cold',
+      more_less: 'More & Less',
+      fat_thin: 'Fat & Thin',
+      superhero: 'Superhero',
+      math_numbers: 'Math Numbers',
+      alphabet: 'Alphabet',
+      shapes: 'Shapes',
+      body_parts: 'Body Parts',
+      opposites: 'Opposites',
+      animals: 'Animals',
+      food: 'Food',
+      transportation: 'Transportation',
+      emotions: 'Emotions',
+      weather: 'Weather',
+      simple_addition: 'Simple Addition'
+    };
+    
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-blue-100 to-indigo-100 p-4">
+        <h1 className="text-5xl font-black text-indigo-800 mb-8">Parent Dashboard 📊</h1>
+        <div className="bg-white rounded-3xl shadow-2xl p-8 max-w-2xl w-full">
+          <div className="grid grid-cols-2 gap-6 mb-6">
+            <div className="text-center p-4 bg-yellow-100 rounded-2xl">
+              <div className="text-4xl font-black text-yellow-700">{totalStars}</div>
+              <div className="text-xl font-bold text-yellow-800">Total Stars ⭐</div>
+            </div>
+            <div className="text-center p-4 bg-purple-100 rounded-2xl">
+              <div className="text-4xl font-black text-purple-700">{stickers.length}</div>
+              <div className="text-xl font-bold text-purple-800">Stickers Earned 🎖️</div>
+            </div>
+            <div className="text-center p-4 bg-green-100 rounded-2xl">
+              <div className="text-4xl font-black text-green-700">{totalGames}</div>
+              <div className="text-xl font-bold text-green-800">Games Completed 🎮</div>
+            </div>
+            <div className="text-center p-4 bg-pink-100 rounded-2xl">
+              <div className="text-4xl font-black text-pink-700">{Object.keys(gamesPlayed).length}</div>
+              <div className="text-xl font-bold text-pink-800">Games Played 📚</div>
+            </div>
+          </div>
+          {favoriteGame && (
+            <div className="mb-6 p-4 bg-indigo-100 rounded-2xl">
+              <div className="text-2xl font-bold text-indigo-800 mb-2">Favorite Game:</div>
+              <div className="text-3xl font-black text-indigo-900">{categoryNames[favoriteGame[0]] || favoriteGame[0]}</div>
+              <div className="text-xl text-indigo-700">Played {favoriteGame[1]} time{favoriteGame[1] !== 1 ? 's' : ''}</div>
+            </div>
+          )}
+          <div className="mb-6">
+            <div className="text-2xl font-bold text-indigo-800 mb-3">Recent Stickers:</div>
+            <div className="flex flex-wrap gap-2">
+              {stickers.slice(-10).reverse().map((sticker, i) => (
+                <span key={i} className="text-4xl">{sticker.emoji}</span>
+              ))}
+            </div>
+          </div>
+          <button
+            onClick={() => setShowParentMode(false)}
+            className="w-full px-8 py-4 bg-indigo-600 text-white text-2xl rounded-full font-bold shadow-xl border-b-8 border-indigo-800 active:border-b-0 active:translate-y-2 transition-all"
+          >
+            Back to Games 🏠
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   // --- SCREEN: CATEGORY SELECTION ---
   if (!category) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-sky-100 via-purple-100 to-pink-100 p-4">
+        <div className="w-full max-w-3xl flex justify-between items-center mb-4">
+          <div className="text-2xl font-bold text-purple-700">⭐ {totalStars} Stars</div>
+          <button
+            onClick={() => setShowParentMode(true)}
+            className="px-4 py-2 bg-indigo-500 text-white text-lg rounded-full font-bold shadow-lg"
+          >
+            📊 Stats
+          </button>
+        </div>
+        
         <h1 className="text-5xl font-black text-sky-800 mb-8 tracking-tight">Let's Play! 🚀</h1>
         
         {/* Play a GAME Button - Prominent and Large */}
@@ -244,7 +449,7 @@ export default function Home() {
           🎮 Play a GAME 🎮
         </button>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-3xl">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-4xl">
           <MenuButton onClick={() => startCategory('tall_short')} color="bg-orange-400" label="🦒 Tall & Short" />
           <MenuButton onClick={() => startCategory('big_small')} color="bg-green-500" label="🐘 Big & Small" />
           <MenuButton onClick={() => startCategory('colors')} color="bg-pink-500" label="🎨 Colors" />
@@ -256,6 +461,15 @@ export default function Home() {
           <MenuButton onClick={() => startCategory('superhero')} color="bg-red-600" label="🦸 Superhero" />
           <MenuButton onClick={() => startCategory('math_numbers')} color="bg-indigo-500" label="🔢 Math Numbers" />
           <MenuButton onClick={() => startCategory('alphabet')} color="bg-emerald-500" label="📚 Alphabet" />
+          <MenuButton onClick={() => startCategory('shapes')} color="bg-cyan-500" label="🔷 Shapes" />
+          <MenuButton onClick={() => startCategory('body_parts')} color="bg-rose-500" label="👃 Body Parts" />
+          <MenuButton onClick={() => startCategory('opposites')} color="bg-violet-500" label="⬆️ Opposites" />
+          <MenuButton onClick={() => startCategory('animals')} color="bg-amber-500" label="🐄 Animals" />
+          <MenuButton onClick={() => startCategory('food')} color="bg-lime-500" label="🍎 Food" />
+          <MenuButton onClick={() => startCategory('transportation')} color="bg-sky-500" label="✈️ Transportation" />
+          <MenuButton onClick={() => startCategory('emotions')} color="bg-fuchsia-500" label="😊 Emotions" />
+          <MenuButton onClick={() => startCategory('weather')} color="bg-slate-400" label="☀️ Weather" />
+          <MenuButton onClick={() => startCategory('simple_addition')} color="bg-orange-600" label="➕ Addition" />
         </div>
       </div>
     );
@@ -265,7 +479,7 @@ export default function Home() {
   if (questionQueue.length === 0) return <div>Loading...</div>; // Safety check
 
   const currentQ = questionQueue[0];
-  const isAudioModule = category === 'math_numbers' || category === 'alphabet';
+  const isAudioModule = category === 'math_numbers' || category === 'alphabet' || category === 'simple_addition';
 
   return (
     <div className={`flex flex-col items-center justify-center min-h-screen p-4 transition-colors duration-300 ${feedback === 'correct' ? 'bg-green-200' : feedback === 'wrong' ? 'bg-red-200' : category === 'superhero' ? 'bg-gradient-to-br from-red-50 to-blue-50' : 'bg-white'}`}>
@@ -280,6 +494,26 @@ export default function Home() {
         </div>
       </div>
 
+      {/* Hint Button */}
+      {!showHint && (
+        <button
+          onClick={handleShowHint}
+          className="absolute top-20 right-4 px-4 py-2 bg-yellow-400 text-yellow-900 text-xl rounded-full font-bold shadow-lg border-b-4 border-yellow-600 active:border-b-0 active:translate-y-1 transition-all"
+        >
+          💡 Hint
+        </button>
+      )}
+
+      {/* Hint Display */}
+      {showHint && questionQueue.length > 0 && (
+        <div className="absolute top-20 right-4 bg-yellow-100 border-4 border-yellow-400 rounded-2xl p-4 shadow-2xl z-10 max-w-xs">
+          <div className="text-2xl font-bold text-yellow-800 mb-2">💡 Hint:</div>
+          <div className="text-xl text-yellow-900">
+            Look for: {currentQ[currentQ.correct].txt} {currentQ[currentQ.correct].icon}
+          </div>
+        </div>
+      )}
+
       {/* Question Text */}
       <h2 className="text-4xl md:text-6xl font-black text-slate-800 mb-8 text-center leading-tight mt-12">{currentQ.q}</h2>
       
@@ -289,15 +523,15 @@ export default function Home() {
       )}
 
       {/* Replay Sound Button for Audio Modules */}
-      {isAudioModule && currentQ.speakText && (
+      {(isAudioModule && currentQ.speakText) || (category === 'animals' && currentQ.sound) ? (
         <button
           onClick={handleReplaySound}
           disabled={isSpeaking}
           className="mb-6 px-6 py-3 bg-blue-500 text-white text-xl rounded-full font-bold shadow-lg border-b-4 border-blue-700 active:border-b-0 active:translate-y-1 transition-all disabled:opacity-50"
         >
-          {isSpeaking ? '🔊 Speaking...' : '🔊 Listen Again'}
+          {isSpeaking ? '🔊 Playing...' : category === 'animals' ? '🔊 Hear Sound' : '🔊 Listen Again'}
         </button>
-      )}
+      ) : null}
 
       {/* Answer Buttons */}
       <div className="grid grid-cols-2 gap-6 w-full max-w-3xl">
@@ -308,7 +542,9 @@ export default function Home() {
       {/* Celebration Overlay */}
       {feedback === 'correct' && (
         <div className="fixed inset-0 flex items-center justify-center pointer-events-none z-50">
-           <div className="text-[150px] animate-bounce drop-shadow-2xl">✨</div>
+          <div className="text-[150px] animate-bounce drop-shadow-2xl">✨</div>
+          <div className="absolute text-[100px] animate-ping" style={{ animationDelay: '0.2s' }}>🎉</div>
+          <div className="absolute text-[80px] animate-pulse" style={{ animationDelay: '0.4s' }}>⭐</div>
         </div>
       )}
     </div>
@@ -331,7 +567,7 @@ function DisplayContent({ question, isAudioModule }) {
           onError={() => setImageError(true)}
         />
       ) : (
-        <span>{question.display}</span>
+        <span className="text-6xl md:text-8xl font-black">{question.display}</span>
       )}
     </div>
   );
