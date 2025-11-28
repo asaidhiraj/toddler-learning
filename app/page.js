@@ -143,8 +143,8 @@ export default function Home() {
   };
 
   const startCategory = (catKey) => {
-    // Shuffle the questions for this category
-    const questions = shuffleArray(learningModules[catKey]);
+    // Shuffle the questions for this category (they're already randomized on load, but shuffle again for variety)
+    const questions = shuffleArray([...learningModules[catKey]]);
     setQuestionQueue(questions);
     setCategory(catKey);
     setScore(0);
@@ -198,6 +198,12 @@ export default function Home() {
     }
   };
 
+  const playRandomGame = () => {
+    const categories = Object.keys(learningModules);
+    const randomCategory = categories[Math.floor(Math.random() * categories.length)];
+    startCategory(randomCategory);
+  };
+
   // --- SCREEN: REWARD ---
   if (showReward) {
     const rewardEmoji = category === 'superhero' ? '🦸' : category === 'math_numbers' ? '🔢' : category === 'alphabet' ? '📚' : '🏆';
@@ -229,6 +235,15 @@ export default function Home() {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-sky-100 via-purple-100 to-pink-100 p-4">
         <h1 className="text-5xl font-black text-sky-800 mb-8 tracking-tight">Let's Play! 🚀</h1>
+        
+        {/* Play a GAME Button - Prominent and Large */}
+        <button
+          onClick={playRandomGame}
+          className="mb-8 px-12 py-6 bg-gradient-to-r from-purple-600 to-pink-600 text-white text-3xl md:text-4xl font-black rounded-3xl shadow-2xl border-b-8 border-purple-800 hover:brightness-110 active:border-b-0 active:translate-y-2 transition-all animate-pulse hover:animate-none"
+        >
+          🎮 Play a GAME 🎮
+        </button>
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-3xl">
           <MenuButton onClick={() => startCategory('tall_short')} color="bg-orange-400" label="🦒 Tall & Short" />
           <MenuButton onClick={() => startCategory('big_small')} color="bg-green-500" label="🐘 Big & Small" />
@@ -270,9 +285,7 @@ export default function Home() {
       
       {/* Special Display for Counting, Math, and Alphabet */}
       {currentQ.display && (
-        <div className={`text-7xl mb-8 p-6 bg-slate-50 rounded-3xl shadow-inner border-4 border-slate-100 ${isAudioModule ? 'animate-pulse' : ''}`}>
-          {currentQ.display}
-        </div>
+        <DisplayContent question={currentQ} isAudioModule={isAudioModule} />
       )}
 
       {/* Replay Sound Button for Audio Modules */}
@@ -304,6 +317,26 @@ export default function Home() {
 
 // --- SUB-COMPONENTS FOR CLEANER CODE ---
 
+function DisplayContent({ question, isAudioModule }) {
+  const [imageError, setImageError] = useState(false);
+  const showImage = question.displayImage && !imageError;
+  
+  return (
+    <div className={`text-7xl mb-8 p-6 bg-slate-50 rounded-3xl shadow-inner border-4 border-slate-100 ${isAudioModule ? 'animate-pulse' : ''} flex items-center justify-center`}>
+      {showImage ? (
+        <img 
+          src={question.displayImage} 
+          alt="Counting fingers"
+          className="w-48 h-48 md:w-64 md:h-64 object-contain"
+          onError={() => setImageError(true)}
+        />
+      ) : (
+        <span>{question.display}</span>
+      )}
+    </div>
+  );
+}
+
 function MenuButton({ onClick, color, label }) {
   return (
     <button 
@@ -316,12 +349,25 @@ function MenuButton({ onClick, color, label }) {
 }
 
 function GameButton({ option, onClick }) {
+  const [imageError, setImageError] = useState(false);
+  
   return (
     <button
       onClick={onClick}
       className="flex flex-col items-center justify-center p-6 md:p-10 bg-white rounded-3xl shadow-xl border-b-8 border-slate-200 hover:bg-blue-50 hover:border-blue-300 hover:-translate-y-1 active:border-b-0 active:translate-y-2 transition-all h-64"
     >
-      <span className="text-8xl md:text-9xl mb-4 drop-shadow-sm transform transition-transform hover:scale-110">{option.icon}</span>
+      {option.imageUrl && !imageError ? (
+        <img 
+          src={option.imageUrl} 
+          alt={option.txt}
+          className="w-32 h-32 md:w-40 md:h-40 mb-4 object-cover rounded-lg drop-shadow-sm transform transition-transform hover:scale-110"
+          onError={() => setImageError(true)}
+        />
+      ) : (
+        <span className="text-8xl md:text-9xl mb-4 drop-shadow-sm transform transition-transform hover:scale-110">
+          {option.icon}
+        </span>
+      )}
       <span className="text-2xl md:text-4xl text-slate-600 font-bold">{option.txt}</span>
     </button>
   );
