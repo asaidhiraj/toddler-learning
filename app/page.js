@@ -134,12 +134,21 @@ export default function Home() {
 
   // --- AUDIO ENGINE ---
   const playSound = (type) => {
-    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    const oscillator = audioCtx.createOscillator();
-    const gainNode = audioCtx.createGain();
-    
-    oscillator.connect(gainNode);
-    gainNode.connect(audioCtx.destination);
+    try {
+      const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+      if (!AudioContextClass) return;
+      
+      const audioCtx = new AudioContextClass();
+      // Resume audio context if suspended (required by some browsers)
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+      
+      const oscillator = audioCtx.createOscillator();
+      const gainNode = audioCtx.createGain();
+      
+      oscillator.connect(gainNode);
+      gainNode.connect(audioCtx.destination);
 
     if (type === 'correct') {
       // Cheerful chord
@@ -197,12 +206,23 @@ export default function Home() {
       oscillator.start();
       oscillator.stop(audioCtx.currentTime + 0.2);
     }
+    } catch (error) {
+      console.log('Sound playback error:', error);
+    }
   };
 
   // Animal sounds (simple tone approximations)
   const playAnimalSound = (animal) => {
-    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    const sounds = {
+    try {
+      const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+      if (!AudioContextClass) return;
+      
+      const audioCtx = new AudioContextClass();
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+      
+      const sounds = {
       moo: { freq: 150, duration: 0.4 },
       woof: { freq: 200, duration: 0.2 },
       meow: { freq: 400, duration: 0.3 },
@@ -226,6 +246,9 @@ export default function Home() {
       oscillator.start();
       oscillator.stop(audioCtx.currentTime + sound.duration);
     }
+    } catch (error) {
+      console.log('Animal sound playback error:', error);
+    }
   };
 
   const startCategory = (catKey) => {
@@ -239,7 +262,16 @@ export default function Home() {
 
   const handleAnswer = (choice) => {
     const currentQ = questionQueue[0];
-    const isCorrect = choice === currentQ.correct;
+    let isCorrect;
+    
+    // Handle find_object game type (uses numeric index)
+    if (category === 'find_object' && currentQ.options) {
+      isCorrect = choice === currentQ.correct;
+    } else {
+      // Handle standard game type (uses 'a' or 'b')
+      isCorrect = choice === currentQ.correct;
+    }
+    
     setShowHint(false);
 
     if (isCorrect) {
@@ -374,7 +406,14 @@ export default function Home() {
       transportation: 'Transportation',
       emotions: 'Emotions',
       weather: 'Weather',
-      simple_addition: 'Simple Addition'
+      simple_addition: 'Simple Addition',
+      find_object: 'Find Object',
+      patterns: 'Patterns',
+      habits: 'Good Habits',
+      vegetables_fruits: 'Vegetables & Fruits',
+      places_india: 'Places in India',
+      important_people: 'Important People',
+      temples_gods: 'Temples & Gods'
     };
     
     return (
@@ -470,6 +509,13 @@ export default function Home() {
           <MenuButton onClick={() => startCategory('emotions')} color="bg-fuchsia-500" label="😊 Emotions" />
           <MenuButton onClick={() => startCategory('weather')} color="bg-slate-400" label="☀️ Weather" />
           <MenuButton onClick={() => startCategory('simple_addition')} color="bg-orange-600" label="➕ Addition" />
+          <MenuButton onClick={() => startCategory('find_object')} color="bg-amber-600" label="🔍 Find Object" />
+          <MenuButton onClick={() => startCategory('patterns')} color="bg-purple-600" label="🔁 Patterns" />
+          <MenuButton onClick={() => startCategory('habits')} color="bg-green-600" label="👍 Good Habits" />
+          <MenuButton onClick={() => startCategory('vegetables_fruits')} color="bg-lime-600" label="🥕 Veg & Fruits" />
+          <MenuButton onClick={() => startCategory('places_india')} color="bg-cyan-600" label="🏛️ Places India" />
+          <MenuButton onClick={() => startCategory('important_people')} color="bg-blue-600" label="👮 Important People" />
+          <MenuButton onClick={() => startCategory('temples_gods')} color="bg-yellow-600" label="🛕 Temples & Gods" />
         </div>
       </div>
     );
@@ -509,7 +555,13 @@ export default function Home() {
         <div className="absolute top-20 right-4 bg-yellow-100 border-4 border-yellow-400 rounded-2xl p-4 shadow-2xl z-10 max-w-xs">
           <div className="text-2xl font-bold text-yellow-800 mb-2">💡 Hint:</div>
           <div className="text-xl text-yellow-900">
-            Look for: {currentQ[currentQ.correct].txt} {currentQ[currentQ.correct].icon}
+            {category === 'find_object' && currentQ.options ? (
+              <>Look for: {currentQ.options[currentQ.correct].txt} {currentQ.options[currentQ.correct].icon}</>
+            ) : category === 'patterns' ? (
+              <>The pattern repeats!</>
+            ) : (
+              <>Look for: {currentQ[currentQ.correct]?.txt} {currentQ[currentQ.correct]?.icon}</>
+            )}
           </div>
         </div>
       )}
@@ -534,10 +586,33 @@ export default function Home() {
       ) : null}
 
       {/* Answer Buttons */}
-      <div className="grid grid-cols-2 gap-6 w-full max-w-3xl">
-        <GameButton option={currentQ.a} onClick={() => handleAnswer('a')} />
-        <GameButton option={currentQ.b} onClick={() => handleAnswer('b')} />
-      </div>
+      {category === 'find_object' && currentQ.options ? (
+        <div className="grid grid-cols-2 gap-6 w-full max-w-3xl">
+          {currentQ.options.map((option, index) => (
+            <GameButton key={index} option={option} onClick={() => handleAnswer(index)} />
+          ))}
+        </div>
+      ) : category === 'patterns' && currentQ.pattern ? (
+        <div className="w-full max-w-3xl">
+          <div className="mb-6 p-4 bg-blue-50 rounded-2xl">
+            <div className="text-4xl md:text-5xl flex justify-center gap-2 mb-4 flex-wrap">
+              {currentQ.pattern.map((item, i) => (
+                <span key={i}>{item}</span>
+              ))}
+              <span className="text-gray-400">?</span>
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-6">
+            <GameButton option={currentQ.options[0]} onClick={() => handleAnswer('a')} />
+            <GameButton option={currentQ.options[1]} onClick={() => handleAnswer('b')} />
+          </div>
+        </div>
+      ) : (
+        <div className="grid grid-cols-2 gap-6 w-full max-w-3xl">
+          <GameButton option={currentQ.a} onClick={() => handleAnswer('a')} />
+          <GameButton option={currentQ.b} onClick={() => handleAnswer('b')} />
+        </div>
+      )}
 
       {/* Celebration Overlay */}
       {feedback === 'correct' && (
