@@ -13,8 +13,8 @@ export async function POST(request) {
     console.log('API key found, length:', apiKey.length);
 
     const genAI = new GoogleGenerativeAI(apiKey);
-    // Try gemini-1.5-flash first (faster), fallback to gemini-pro
-    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+    // Use Gemini 3.0 (latest model)
+    const model = genAI.getGenerativeModel({ model: 'gemini-3.0' });
 
     const prompt = `Generate 7 educational questions for a 3.5-year-old child learning about "${topic || category}".
 
