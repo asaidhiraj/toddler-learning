@@ -1,5 +1,17 @@
 // app/questions.js
 
+// Helper function to get real images from free stock photo services
+const getImageUrl = (keyword, width = 400, height = 400) => {
+  // Using Pexels - free stock photos, no API key needed for direct URLs
+  // Alternative: Using Unsplash Source API (may be less reliable)
+  const searchTerm = keyword.toLowerCase().replace(/\s+/g, '-');
+  
+  // Try Pexels first (more reliable), fallback to Unsplash
+  // Pexels direct search: https://images.pexels.com/photos/{id}/pexels-photo-{id}.jpeg
+  // For now, using Unsplash Source API which is simpler
+  return `https://source.unsplash.com/${width}x${height}/?${searchTerm}&sig=${Math.random()}`;
+};
+
 export const learningModules = {
   tall_short: [
     { q: "Which one is TALL?",  a: { txt: "Giraffe", icon: "🦒" }, b: { txt: "Duck", icon: "🦆" }, correct: 'a' },
@@ -38,22 +50,22 @@ export const learningModules = {
     { q: "Which side has MORE?", a: { txt: "4 Cars", icon: "🚗🚗🚗🚗" }, b: { txt: "2 Cars", icon: "🚗🚗" }, correct: 'a' },
   ],
   counting: [
-    { q: "How many fingers?", display: "1️⃣", displayImage: "/hands/hand-1.png", a: { txt: "One", icon: "1️⃣" }, b: { txt: "Two", icon: "2️⃣" }, correct: 'a' },
-    { q: "How many fingers?", display: "2️⃣", displayImage: "/hands/hand-2.png", a: { txt: "Two", icon: "2️⃣" }, b: { txt: "Three", icon: "3️⃣" }, correct: 'a' },
-    { q: "How many fingers?", display: "3️⃣", displayImage: "/hands/hand-3.png", a: { txt: "Three", icon: "3️⃣" }, b: { txt: "Four", icon: "4️⃣" }, correct: 'a' },
-    { q: "How many fingers?", display: "4️⃣", displayImage: "/hands/hand-4.png", a: { txt: "Four", icon: "4️⃣" }, b: { txt: "Five", icon: "5️⃣" }, correct: 'a' },
-    { q: "How many fingers?", display: "5️⃣", displayImage: "/hands/hand-5.png", a: { txt: "Five", icon: "5️⃣" }, b: { txt: "Three", icon: "3️⃣" }, correct: 'a' },
-    { q: "How many fingers?", display: "1️⃣", displayImage: "/hands/hand-1.png", a: { txt: "One", icon: "1️⃣" }, b: { txt: "Four", icon: "4️⃣" }, correct: 'a' },
-    { q: "How many fingers?", display: "2️⃣", displayImage: "/hands/hand-2.png", a: { txt: "Two", icon: "2️⃣" }, b: { txt: "Five", icon: "5️⃣" }, correct: 'a' },
+    { q: "How many fingers?", display: "1️⃣", displayImage: getImageUrl("hand showing one finger", 300, 300), a: { txt: "One", icon: "1️⃣" }, b: { txt: "Two", icon: "2️⃣" }, correct: 'a' },
+    { q: "How many fingers?", display: "2️⃣", displayImage: getImageUrl("hand showing two fingers", 300, 300), a: { txt: "Two", icon: "2️⃣" }, b: { txt: "Three", icon: "3️⃣" }, correct: 'a' },
+    { q: "How many fingers?", display: "3️⃣", displayImage: getImageUrl("hand showing three fingers", 300, 300), a: { txt: "Three", icon: "3️⃣" }, b: { txt: "Four", icon: "4️⃣" }, correct: 'a' },
+    { q: "How many fingers?", display: "4️⃣", displayImage: getImageUrl("hand showing four fingers", 300, 300), a: { txt: "Four", icon: "4️⃣" }, b: { txt: "Five", icon: "5️⃣" }, correct: 'a' },
+    { q: "How many fingers?", display: "5️⃣", displayImage: getImageUrl("hand showing five fingers", 300, 300), a: { txt: "Five", icon: "5️⃣" }, b: { txt: "Three", icon: "3️⃣" }, correct: 'a' },
+    { q: "How many fingers?", display: "1️⃣", displayImage: getImageUrl("hand showing one finger", 300, 300), a: { txt: "One", icon: "1️⃣" }, b: { txt: "Four", icon: "4️⃣" }, correct: 'a' },
+    { q: "How many fingers?", display: "2️⃣", displayImage: getImageUrl("hand showing two fingers", 300, 300), a: { txt: "Two", icon: "2️⃣" }, b: { txt: "Five", icon: "5️⃣" }, correct: 'a' },
   ],
   colors: [
-    { q: "Touch the RED one", a: { txt: "Apple", icon: "🍎" }, b: { txt: "Leaf", icon: "🍃" }, correct: 'a' },
-    { q: "Touch the BLUE one", a: { txt: "Sun", icon: "☀️" }, b: { txt: "Ocean", icon: "🌊" }, correct: 'b' },
-    { q: "Touch the YELLOW one", a: { txt: "Banana", icon: "🍌" }, b: { txt: "Grapes", icon: "🍇" }, correct: 'a' },
-    { q: "Touch the GREEN one", a: { txt: "Fire", icon: "🔥" }, b: { txt: "Turtle", icon: "🐢" }, correct: 'b' },
-    { q: "Touch the ORANGE one", a: { txt: "Basketball", icon: "🏀" }, b: { txt: "Moon", icon: "🌕" }, correct: 'a' },
-    { q: "Touch the RED one", a: { txt: "Strawberry", icon: "🍓" }, b: { txt: "Blueberry", icon: "🫐" }, correct: 'a' },
-    { q: "Touch the BLUE one", a: { txt: "Blue Ball", icon: "🔵" }, b: { txt: "Sunset", icon: "🌅" }, correct: 'a' },
+    { q: "Touch the RED one", a: { txt: "Apple", icon: "🍎", imageUrl: getImageUrl("red apple", 400, 400) }, b: { txt: "Leaf", icon: "🍃", imageUrl: getImageUrl("green leaf", 400, 400) }, correct: 'a' },
+    { q: "Touch the BLUE one", a: { txt: "Sun", icon: "☀️", imageUrl: getImageUrl("yellow sun", 400, 400) }, b: { txt: "Ocean", icon: "🌊", imageUrl: getImageUrl("blue ocean water", 400, 400) }, correct: 'b' },
+    { q: "Touch the YELLOW one", a: { txt: "Banana", icon: "🍌", imageUrl: getImageUrl("yellow banana", 400, 400) }, b: { txt: "Grapes", icon: "🍇", imageUrl: getImageUrl("purple grapes", 400, 400) }, correct: 'a' },
+    { q: "Touch the GREEN one", a: { txt: "Fire", icon: "🔥", imageUrl: getImageUrl("red fire", 400, 400) }, b: { txt: "Turtle", icon: "🐢", imageUrl: getImageUrl("green turtle", 400, 400) }, correct: 'b' },
+    { q: "Touch the ORANGE one", a: { txt: "Basketball", icon: "🏀", imageUrl: getImageUrl("orange basketball", 400, 400) }, b: { txt: "Moon", icon: "🌕", imageUrl: getImageUrl("white moon", 400, 400) }, correct: 'a' },
+    { q: "Touch the RED one", a: { txt: "Strawberry", icon: "🍓", imageUrl: getImageUrl("red strawberry", 400, 400) }, b: { txt: "Blueberry", icon: "🫐", imageUrl: getImageUrl("blue blueberry", 400, 400) }, correct: 'a' },
+    { q: "Touch the BLUE one", a: { txt: "Blue Ball", icon: "🔵", imageUrl: getImageUrl("blue ball", 400, 400) }, b: { txt: "Sunset", icon: "🌅", imageUrl: getImageUrl("orange sunset", 400, 400) }, correct: 'a' },
   ],
   fast_slow: [
     { q: "Which one is FAST?", a: { txt: "Rocket", icon: "🚀" }, b: { txt: "Snail", icon: "🐌" }, correct: 'a' },
@@ -74,13 +86,13 @@ export const learningModules = {
     { q: "Which one is HOT?", a: { txt: "Lava", icon: "🌋" }, b: { txt: "Ice", icon: "🧊" }, correct: 'a' },
   ],
   superhero: [
-    { q: "Which superhero can FLY?", a: { txt: "Superman", imageUrl: "/superheroes/superman.png", icon: "🦸" }, b: { txt: "Batman", imageUrl: "/superheroes/batman.png", icon: "🦇" }, correct: 'a' },
-    { q: "Which superhero is STRONG?", a: { txt: "Spider-Man", imageUrl: "/superheroes/spiderman.png", icon: "🕷️" }, b: { txt: "Hulk", imageUrl: "/superheroes/hulk.png", icon: "💪" }, correct: 'b' },
-    { q: "Which superhero has a SHIELD?", a: { txt: "Captain America", imageUrl: "/superheroes/captain-america.png", icon: "🛡️" }, b: { txt: "Iron Man", imageUrl: "/superheroes/ironman.png", icon: "🤖" }, correct: 'a' },
-    { q: "Which superhero is FAST?", a: { txt: "Flash", imageUrl: "/superheroes/flash.png", icon: "⚡" }, b: { txt: "Wonder Woman", imageUrl: "/superheroes/wonder-woman.png", icon: "👸" }, correct: 'a' },
+    { q: "Which superhero can FLY?", a: { txt: "Superman", imageUrl: getImageUrl("superman superhero", 400, 400), icon: "🦸" }, b: { txt: "Batman", imageUrl: getImageUrl("batman superhero", 400, 400), icon: "🦇" }, correct: 'a' },
+    { q: "Which superhero is STRONG?", a: { txt: "Spider-Man", imageUrl: getImageUrl("spiderman superhero", 400, 400), icon: "🕷️" }, b: { txt: "Hulk", imageUrl: getImageUrl("hulk superhero", 400, 400), icon: "💪" }, correct: 'b' },
+    { q: "Which superhero has a SHIELD?", a: { txt: "Captain America", imageUrl: getImageUrl("captain america superhero", 400, 400), icon: "🛡️" }, b: { txt: "Iron Man", imageUrl: getImageUrl("iron man superhero", 400, 400), icon: "🤖" }, correct: 'a' },
+    { q: "Which superhero is FAST?", a: { txt: "Flash", imageUrl: getImageUrl("flash superhero", 400, 400), icon: "⚡" }, b: { txt: "Wonder Woman", imageUrl: getImageUrl("wonder woman superhero", 400, 400), icon: "👸" }, correct: 'a' },
     { q: "Which superhero helps OTHERS?", a: { txt: "All Heroes", icon: "🌟" }, b: { txt: "Villain", icon: "😈" }, correct: 'a' },
-    { q: "Which superhero has a CAPE?", a: { txt: "Superman", imageUrl: "/superheroes/superman.png", icon: "🦸" }, b: { txt: "Hulk", imageUrl: "/superheroes/hulk.png", icon: "💪" }, correct: 'a' },
-    { q: "Which superhero can CLIMB WALLS?", a: { txt: "Spider-Man", imageUrl: "/superheroes/spiderman.png", icon: "🕷️" }, b: { txt: "Batman", imageUrl: "/superheroes/batman.png", icon: "🦇" }, correct: 'a' },
+    { q: "Which superhero has a CAPE?", a: { txt: "Superman", imageUrl: getImageUrl("superman superhero cape", 400, 400), icon: "🦸" }, b: { txt: "Hulk", imageUrl: getImageUrl("hulk superhero", 400, 400), icon: "💪" }, correct: 'a' },
+    { q: "Which superhero can CLIMB WALLS?", a: { txt: "Spider-Man", imageUrl: getImageUrl("spiderman superhero", 400, 400), icon: "🕷️" }, b: { txt: "Batman", imageUrl: getImageUrl("batman superhero", 400, 400), icon: "🦇" }, correct: 'a' },
   ],
   math_numbers: [
     { q: "Listen! What number is this?", number: 1, display: "1️⃣", a: { txt: "One", icon: "1️⃣" }, b: { txt: "Two", icon: "2️⃣" }, correct: 'a', speakText: "One" },
@@ -128,31 +140,31 @@ export const learningModules = {
     { q: "Which one is DAY?", a: { txt: "Day", icon: "☀️" }, b: { txt: "Night", icon: "🌙" }, correct: 'a' },
   ],
   animals: [
-    { q: "Which animal says MOO?", a: { txt: "Cow", icon: "🐄" }, b: { txt: "Dog", icon: "🐕" }, correct: 'a', sound: "moo" },
-    { q: "Which animal says WOOF?", a: { txt: "Cat", icon: "🐱" }, b: { txt: "Dog", icon: "🐕" }, correct: 'b', sound: "woof" },
-    { q: "Which animal says MEOW?", a: { txt: "Cat", icon: "🐱" }, b: { txt: "Duck", icon: "🦆" }, correct: 'a', sound: "meow" },
-    { q: "Which animal says QUACK?", a: { txt: "Duck", icon: "🦆" }, b: { txt: "Chicken", icon: "🐔" }, correct: 'a', sound: "quack" },
-    { q: "Which animal says ROAR?", a: { txt: "Lion", icon: "🦁" }, b: { txt: "Elephant", icon: "🐘" }, correct: 'a', sound: "roar" },
-    { q: "Which animal says OINK?", a: { txt: "Pig", icon: "🐷" }, b: { txt: "Sheep", icon: "🐑" }, correct: 'a', sound: "oink" },
-    { q: "Which animal says BAA?", a: { txt: "Cow", icon: "🐄" }, b: { txt: "Sheep", icon: "🐑" }, correct: 'b', sound: "baa" },
+    { q: "Which animal says MOO?", a: { txt: "Cow", icon: "🐄", imageUrl: getImageUrl("cow animal", 400, 400) }, b: { txt: "Dog", icon: "🐕", imageUrl: getImageUrl("dog animal", 400, 400) }, correct: 'a', sound: "moo" },
+    { q: "Which animal says WOOF?", a: { txt: "Cat", icon: "🐱", imageUrl: getImageUrl("cat animal", 400, 400) }, b: { txt: "Dog", icon: "🐕", imageUrl: getImageUrl("dog animal", 400, 400) }, correct: 'b', sound: "woof" },
+    { q: "Which animal says MEOW?", a: { txt: "Cat", icon: "🐱", imageUrl: getImageUrl("cat animal", 400, 400) }, b: { txt: "Duck", icon: "🦆", imageUrl: getImageUrl("duck animal", 400, 400) }, correct: 'a', sound: "meow" },
+    { q: "Which animal says QUACK?", a: { txt: "Duck", icon: "🦆", imageUrl: getImageUrl("duck animal", 400, 400) }, b: { txt: "Chicken", icon: "🐔", imageUrl: getImageUrl("chicken animal", 400, 400) }, correct: 'a', sound: "quack" },
+    { q: "Which animal says ROAR?", a: { txt: "Lion", icon: "🦁", imageUrl: getImageUrl("lion animal", 400, 400) }, b: { txt: "Elephant", icon: "🐘", imageUrl: getImageUrl("elephant animal", 400, 400) }, correct: 'a', sound: "roar" },
+    { q: "Which animal says OINK?", a: { txt: "Pig", icon: "🐷", imageUrl: getImageUrl("pig animal", 400, 400) }, b: { txt: "Sheep", icon: "🐑", imageUrl: getImageUrl("sheep animal", 400, 400) }, correct: 'a', sound: "oink" },
+    { q: "Which animal says BAA?", a: { txt: "Cow", icon: "🐄", imageUrl: getImageUrl("cow animal", 400, 400) }, b: { txt: "Sheep", icon: "🐑", imageUrl: getImageUrl("sheep animal", 400, 400) }, correct: 'b', sound: "baa" },
   ],
   food: [
-    { q: "Which one is a FRUIT?", a: { txt: "Apple", icon: "🍎" }, b: { txt: "Bread", icon: "🍞" }, correct: 'a' },
-    { q: "Which one is a VEGETABLE?", a: { txt: "Carrot", icon: "🥕" }, b: { txt: "Banana", icon: "🍌" }, correct: 'a' },
-    { q: "Which one is SWEET?", a: { txt: "Cake", icon: "🎂" }, b: { txt: "Broccoli", icon: "🥦" }, correct: 'a' },
-    { q: "Which one is HEALTHY?", a: { txt: "Apple", icon: "🍎" }, b: { txt: "Candy", icon: "🍬" }, correct: 'a' },
-    { q: "Which one is a FRUIT?", a: { txt: "Orange", icon: "🍊" }, b: { txt: "Carrot", icon: "🥕" }, correct: 'a' },
-    { q: "Which one is a VEGETABLE?", a: { txt: "Tomato", icon: "🍅" }, b: { txt: "Strawberry", icon: "🍓" }, correct: 'a' },
-    { q: "Which one is YELLOW?", a: { txt: "Banana", icon: "🍌" }, b: { txt: "Apple", icon: "🍎" }, correct: 'a' },
+    { q: "Which one is a FRUIT?", a: { txt: "Apple", icon: "🍎", imageUrl: getImageUrl("red apple fruit", 400, 400) }, b: { txt: "Bread", icon: "🍞", imageUrl: getImageUrl("bread food", 400, 400) }, correct: 'a' },
+    { q: "Which one is a VEGETABLE?", a: { txt: "Carrot", icon: "🥕", imageUrl: getImageUrl("carrot vegetable", 400, 400) }, b: { txt: "Banana", icon: "🍌", imageUrl: getImageUrl("banana fruit", 400, 400) }, correct: 'a' },
+    { q: "Which one is SWEET?", a: { txt: "Cake", icon: "🎂", imageUrl: getImageUrl("cake dessert", 400, 400) }, b: { txt: "Broccoli", icon: "🥦", imageUrl: getImageUrl("broccoli vegetable", 400, 400) }, correct: 'a' },
+    { q: "Which one is HEALTHY?", a: { txt: "Apple", icon: "🍎", imageUrl: getImageUrl("red apple fruit", 400, 400) }, b: { txt: "Candy", icon: "🍬", imageUrl: getImageUrl("candy sweets", 400, 400) }, correct: 'a' },
+    { q: "Which one is a FRUIT?", a: { txt: "Orange", icon: "🍊", imageUrl: getImageUrl("orange fruit", 400, 400) }, b: { txt: "Carrot", icon: "🥕", imageUrl: getImageUrl("carrot vegetable", 400, 400) }, correct: 'a' },
+    { q: "Which one is a VEGETABLE?", a: { txt: "Tomato", icon: "🍅", imageUrl: getImageUrl("tomato vegetable", 400, 400) }, b: { txt: "Strawberry", icon: "🍓", imageUrl: getImageUrl("strawberry fruit", 400, 400) }, correct: 'a' },
+    { q: "Which one is YELLOW?", a: { txt: "Banana", icon: "🍌", imageUrl: getImageUrl("yellow banana fruit", 400, 400) }, b: { txt: "Apple", icon: "🍎", imageUrl: getImageUrl("red apple fruit", 400, 400) }, correct: 'a' },
   ],
   transportation: [
-    { q: "Which one FLIES?", a: { txt: "Airplane", icon: "✈️" }, b: { txt: "Car", icon: "🚗" }, correct: 'a' },
-    { q: "Which one is on WATER?", a: { txt: "Boat", icon: "⛵" }, b: { txt: "Car", icon: "🚗" }, correct: 'a' },
-    { q: "Which one has WHEELS?", a: { txt: "Bike", icon: "🚲" }, b: { txt: "Boat", icon: "⛵" }, correct: 'a' },
-    { q: "Which one is FAST?", a: { txt: "Rocket", icon: "🚀" }, b: { txt: "Bike", icon: "🚲" }, correct: 'a' },
-    { q: "Which one is SLOW?", a: { txt: "Rocket", icon: "🚀" }, b: { txt: "Bike", icon: "🚲" }, correct: 'b' },
-    { q: "Which one CARRIES PEOPLE?", a: { txt: "Bus", icon: "🚌" }, b: { txt: "Truck", icon: "🚛" }, correct: 'a' },
-    { q: "Which one is BIG?", a: { txt: "Truck", icon: "🚛" }, b: { txt: "Bike", icon: "🚲" }, correct: 'a' },
+    { q: "Which one FLIES?", a: { txt: "Airplane", icon: "✈️", imageUrl: getImageUrl("airplane aircraft", 400, 400) }, b: { txt: "Car", icon: "🚗", imageUrl: getImageUrl("car vehicle", 400, 400) }, correct: 'a' },
+    { q: "Which one is on WATER?", a: { txt: "Boat", icon: "⛵", imageUrl: getImageUrl("boat water", 400, 400) }, b: { txt: "Car", icon: "🚗", imageUrl: getImageUrl("car vehicle", 400, 400) }, correct: 'a' },
+    { q: "Which one has WHEELS?", a: { txt: "Bike", icon: "🚲", imageUrl: getImageUrl("bicycle bike", 400, 400) }, b: { txt: "Boat", icon: "⛵", imageUrl: getImageUrl("boat water", 400, 400) }, correct: 'a' },
+    { q: "Which one is FAST?", a: { txt: "Rocket", icon: "🚀", imageUrl: getImageUrl("rocket space", 400, 400) }, b: { txt: "Bike", icon: "🚲", imageUrl: getImageUrl("bicycle bike", 400, 400) }, correct: 'a' },
+    { q: "Which one is SLOW?", a: { txt: "Rocket", icon: "🚀", imageUrl: getImageUrl("rocket space", 400, 400) }, b: { txt: "Bike", icon: "🚲", imageUrl: getImageUrl("bicycle bike", 400, 400) }, correct: 'b' },
+    { q: "Which one CARRIES PEOPLE?", a: { txt: "Bus", icon: "🚌", imageUrl: getImageUrl("bus vehicle", 400, 400) }, b: { txt: "Truck", icon: "🚛", imageUrl: getImageUrl("truck vehicle", 400, 400) }, correct: 'a' },
+    { q: "Which one is BIG?", a: { txt: "Truck", icon: "🚛", imageUrl: getImageUrl("truck vehicle", 400, 400) }, b: { txt: "Bike", icon: "🚲", imageUrl: getImageUrl("bicycle bike", 400, 400) }, correct: 'a' },
   ],
   emotions: [
     { q: "Which face is HAPPY?", a: { txt: "Happy", icon: "😊" }, b: { txt: "Sad", icon: "😢" }, correct: 'a' },
