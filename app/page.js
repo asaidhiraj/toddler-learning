@@ -333,6 +333,14 @@ export default function Home() {
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
         console.error('API error:', errorData);
+        
+        // Handle rate limit specifically
+        if (response.status === 429) {
+          console.warn('Rate limit exceeded, using static questions');
+          // Don't throw, fall through to static questions
+          throw new Error('RATE_LIMIT');
+        }
+        
         throw new Error(errorData.error || 'Failed to generate questions');
       }
 
