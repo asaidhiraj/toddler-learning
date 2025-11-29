@@ -140,7 +140,7 @@ export default function Home() {
       if (pool.length >= 10) return;
       
       const categoryTopics = {
-        colors: 'colors and colored objects',
+        colors: 'colors and colored objects (vegetarian and Hindu context only)',
       };
       
       const topic = categoryTopics[catKey] || catKey;
@@ -346,8 +346,8 @@ export default function Home() {
       shapes: 'shapes like circle, square, triangle',
       body_parts: 'body parts',
       opposites: 'opposites like up/down, in/out',
-      animals: 'animals and their sounds',
-      food: 'food items',
+      animals: 'animals and their sounds (vegetarian context only)',
+      food: 'vegetarian food items only (no meat, fish, eggs)',
       transportation: 'vehicles and transportation',
       emotions: 'emotions and feelings',
       weather: 'weather conditions',
@@ -355,10 +355,10 @@ export default function Home() {
       find_object: 'finding objects among options',
       patterns: 'completing patterns',
       habits: 'good habits and bad habits',
-      vegetables_fruits: 'vegetables and fruits',
-      places_india: 'places in India',
+      vegetables_fruits: 'vegetarian vegetables and fruits only',
+      places_india: 'places in India (Hindu context)',
       important_people: 'important people like doctor, teacher',
-      temples_gods: 'Indian temples and gods',
+      temples_gods: 'Hindu temples and Hindu gods only (no other religions)',
       heavy_light: 'heavy and light objects',
       family: 'family members',
       seasons: 'seasons like summer, winter, rainy',
@@ -366,11 +366,11 @@ export default function Home() {
       indoor_outdoor: 'indoor and outdoor activities',
       loud_quiet: 'loud and quiet sounds',
       clean_dirty: 'clean and dirty things',
-      healthy_unhealthy: 'healthy and unhealthy food',
+      healthy_unhealthy: 'healthy and unhealthy vegetarian food only',
       can_fly: 'things that can fly',
-      water_land: 'animals that live in water or on land',
+      water_land: 'animals that live in water or on land (vegetarian context)',
       musical_instruments: 'musical instruments',
-      indian_festivals: 'Indian festivals',
+      indian_festivals: 'Hindu festivals only (Diwali, Holi, etc. - no other religions)',
       body_movements: 'body movements like jump, run, sit',
       same_different: 'same and different objects',
       living_nonliving: 'living and non-living things',

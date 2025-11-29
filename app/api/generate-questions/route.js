@@ -48,9 +48,15 @@ export async function POST(request) {
     const ai = new GoogleGenAI({ apiKey: apiKey });
 
     // Optimized shorter prompt for faster generation
+    // IMPORTANT: Strict requirements - vegetarian only, Hinduism only
     const prompt = `Generate 7 simple questions for a 3.5-year-old about "${topic || category}". Each question has 2 options (a, b) with one correct answer. Return ONLY JSON array:
 [{"q":"Question?","a":{"txt":"Option A","icon":"emoji"},"b":{"txt":"Option B","icon":"emoji"},"correct":"a"},...]
-Use simple words and fun emojis.`;
+Use simple words and fun emojis.
+
+CRITICAL REQUIREMENTS:
+- FOOD/ANIMALS: ONLY vegetarian items. NO meat, fish, chicken, eggs, or any non-vegetarian food.
+- RELIGION/CULTURE: ONLY Hinduism. NO other religions (no Christianity, Islam, Buddhism, etc.). Only Hindu gods, temples, festivals, and traditions.
+- Be culturally appropriate for a Hindu vegetarian family.`;
 
     console.log('Calling Gemini 2.5 Flash API...');
     
