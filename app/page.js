@@ -41,6 +41,7 @@ export default function Home() {
   });
   const [showParentMode, setShowParentMode] = useState(false);
   const [showHint, setShowHint] = useState(false);
+  const [isGeneratingQuestions, setIsGeneratingQuestions] = useState(false);
 
   const WIN_CONDITION = 5; // He needs 5 right answers to get the big reward
 
@@ -251,13 +252,102 @@ export default function Home() {
     }
   };
 
+  const generateQuestionsWithAI = async (catKey) => {
+    setIsGeneratingQuestions(true);
+    try {
+      const categoryTopics = {
+        tall_short: 'tall and short objects',
+        big_small: 'big and small objects',
+        colors: 'colors and colored objects',
+        counting: 'counting numbers 1 to 5',
+        fast_slow: 'fast and slow things',
+        hot_cold: 'hot and cold things',
+        more_less: 'more and less quantities',
+        fat_thin: 'fat and thin objects',
+        superhero: 'superheroes',
+        math_numbers: 'numbers 1 to 10',
+        alphabet: 'alphabet letters A to Z',
+        shapes: 'shapes like circle, square, triangle',
+        body_parts: 'body parts',
+        opposites: 'opposites like up/down, in/out',
+        animals: 'animals and their sounds',
+        food: 'food items',
+        transportation: 'vehicles and transportation',
+        emotions: 'emotions and feelings',
+        weather: 'weather conditions',
+        simple_addition: 'simple addition 1+1 to 5+5',
+        find_object: 'finding objects among options',
+        patterns: 'completing patterns',
+        habits: 'good habits and bad habits',
+        vegetables_fruits: 'vegetables and fruits',
+        places_india: 'places in India',
+        important_people: 'important people like doctor, teacher',
+        temples_gods: 'Indian temples and gods',
+        heavy_light: 'heavy and light objects',
+        family: 'family members',
+        seasons: 'seasons like summer, winter, rainy',
+        time_of_day: 'time of day like morning, afternoon, night',
+        indoor_outdoor: 'indoor and outdoor activities',
+        loud_quiet: 'loud and quiet sounds',
+        clean_dirty: 'clean and dirty things',
+        healthy_unhealthy: 'healthy and unhealthy food',
+        can_fly: 'things that can fly',
+        water_land: 'animals that live in water or on land',
+        musical_instruments: 'musical instruments',
+        indian_festivals: 'Indian festivals',
+        body_movements: 'body movements like jump, run, sit',
+        same_different: 'same and different objects',
+        living_nonliving: 'living and non-living things',
+        safe_unsafe: 'safe and unsafe things',
+        first_last: 'first and last in sequences',
+        day_night_activities: 'day and night activities',
+        indian_traditional: 'Indian traditional and modern items',
+        bigger_smaller_number: 'bigger and smaller numbers',
+        soft_hard: 'soft and hard objects',
+        sweet_sour: 'sweet and sour tastes',
+        trace_shape_matching: 'matching shapes to outlines',
+        birds: 'birds',
+        more_animals: 'different types of animals',
+        daily_habits: 'daily habits and morning routines',
+        utensils_eating: 'utensils like spoon, plate, cup, bowl, fork, knife'
+      };
+
+      const topic = categoryTopics[catKey] || catKey;
+      
+      const response = await fetch('/api/generate-questions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ category: catKey, topic })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to generate questions');
+      }
+
+      const data = await response.json();
+      const questions = shuffleArray(data.questions);
+      setQuestionQueue(questions);
+      setCategory(catKey);
+      setScore(0);
+      setShowReward(false);
+    } catch (error) {
+      console.error('Error generating questions:', error);
+      // Fallback to static questions if AI generation fails
+      if (learningModules[catKey]) {
+        const questions = shuffleArray([...learningModules[catKey]]);
+        setQuestionQueue(questions);
+        setCategory(catKey);
+        setScore(0);
+        setShowReward(false);
+      }
+    } finally {
+      setIsGeneratingQuestions(false);
+    }
+  };
+
   const startCategory = (catKey) => {
-    // Shuffle the questions for this category (they're already randomized on load, but shuffle again for variety)
-    const questions = shuffleArray([...learningModules[catKey]]);
-    setQuestionQueue(questions);
-    setCategory(catKey);
-    setScore(0);
-    setShowReward(false);
+    // Use AI to generate questions dynamically
+    generateQuestionsWithAI(catKey);
   };
 
   const handleAnswer = (choice) => {
@@ -571,6 +661,17 @@ export default function Home() {
           <MenuButton onClick={() => startCategory('daily_habits')} color="bg-green-300" label="🌅 Daily Habits" />
           <MenuButton onClick={() => startCategory('utensils_eating')} color="bg-orange-300" label="🍽️ Utensils" />
         </div>
+      </div>
+    );
+  }
+
+  // --- SCREEN: LOADING (Generating Questions) ---
+  if (isGeneratingQuestions) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-purple-100 to-pink-100 p-4">
+        <div className="text-6xl mb-4 animate-spin">🤖</div>
+        <h2 className="text-4xl font-black text-purple-700 mb-4">Creating New Questions...</h2>
+        <p className="text-2xl text-purple-600">Using AI to make learning fun! ✨</p>
       </div>
     );
   }
