@@ -128,30 +128,27 @@ export default function Home() {
     }
   }, []);
 
-  // Pre-populate question pools in background (for popular categories)
+  // Pre-populate question pools VERY slowly (only 1 category, with long delay)
   useEffect(() => {
     if (!useAIQuestions || typeof window === 'undefined') return;
     
-    // Pre-populate pools for most common categories
-    const popularCategories = ['colors', 'counting', 'shapes', 'animals', 'big_small', 'tall_short'];
-    
-    const prePopulatePool = async (catKey) => {
+    // Only pre-populate ONE most common category, very slowly
+    const prePopulatePool = async () => {
+      const catKey = 'colors'; // Just one category
       const pool = getQuestionPool(catKey);
-      // Only pre-populate if pool is small (< 20 questions)
-      if (pool.length >= 20) return;
+      // Only pre-populate if pool is very small (< 10 questions)
+      if (pool.length >= 10) return;
       
       const categoryTopics = {
-        tall_short: 'tall and short objects',
-        big_small: 'big and small objects',
         colors: 'colors and colored objects',
-        counting: 'counting numbers 1 to 5',
-        shapes: 'shapes like circle, square, triangle',
-        animals: 'animals and their sounds',
       };
       
       const topic = categoryTopics[catKey] || catKey;
       
       try {
+        // Wait 10 seconds before even trying
+        await new Promise(resolve => setTimeout(resolve, 10000));
+        
         const response = await fetch('/api/generate-questions', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -162,18 +159,18 @@ export default function Home() {
           const data = await response.json();
           if (data.questions && data.questions.length > 0) {
             saveQuestionPool(catKey, data.questions);
-            console.log('Pre-populated pool for', catKey, 'with', data.questions.length, 'questions');
+            console.log('Pre-populated pool for', catKey);
           }
+        } else if (response.status === 429) {
+          console.log('Rate limited during pre-population, skipping');
         }
       } catch (error) {
-        console.log('Background pre-population failed for', catKey, '- will populate on demand');
+        console.log('Background pre-population skipped');
       }
     };
     
-    // Pre-populate pools one at a time with delays to avoid rate limits
-    popularCategories.forEach((catKey, index) => {
-      setTimeout(() => prePopulatePool(catKey), index * 2000); // 2 second delay between each
-    });
+    // Only pre-populate after 5 seconds, and only one category
+    setTimeout(() => prePopulatePool(), 5000);
   }, [useAIQuestions]);
 
   // Auto-speak when question changes for math/alphabet/simple_addition modules
@@ -334,144 +331,138 @@ export default function Home() {
   };
 
   const generateQuestionsWithAI = async (catKey) => {
-    // Step 1: Get 7 questions from pool immediately (no loading!)
+    const categoryTopics = {
+      tall_short: 'tall and short objects',
+      big_small: 'big and small objects',
+      colors: 'colors and colored objects',
+      counting: 'counting numbers 1 to 5',
+      fast_slow: 'fast and slow things',
+      hot_cold: 'hot and cold things',
+      more_less: 'more and less quantities',
+      fat_thin: 'fat and thin objects',
+      superhero: 'superheroes',
+      math_numbers: 'numbers 1 to 10',
+      alphabet: 'alphabet letters A to Z',
+      shapes: 'shapes like circle, square, triangle',
+      body_parts: 'body parts',
+      opposites: 'opposites like up/down, in/out',
+      animals: 'animals and their sounds',
+      food: 'food items',
+      transportation: 'vehicles and transportation',
+      emotions: 'emotions and feelings',
+      weather: 'weather conditions',
+      simple_addition: 'simple addition 1+1 to 5+5',
+      find_object: 'finding objects among options',
+      patterns: 'completing patterns',
+      habits: 'good habits and bad habits',
+      vegetables_fruits: 'vegetables and fruits',
+      places_india: 'places in India',
+      important_people: 'important people like doctor, teacher',
+      temples_gods: 'Indian temples and gods',
+      heavy_light: 'heavy and light objects',
+      family: 'family members',
+      seasons: 'seasons like summer, winter, rainy',
+      time_of_day: 'time of day like morning, afternoon, night',
+      indoor_outdoor: 'indoor and outdoor activities',
+      loud_quiet: 'loud and quiet sounds',
+      clean_dirty: 'clean and dirty things',
+      healthy_unhealthy: 'healthy and unhealthy food',
+      can_fly: 'things that can fly',
+      water_land: 'animals that live in water or on land',
+      musical_instruments: 'musical instruments',
+      indian_festivals: 'Indian festivals',
+      body_movements: 'body movements like jump, run, sit',
+      same_different: 'same and different objects',
+      living_nonliving: 'living and non-living things',
+      safe_unsafe: 'safe and unsafe things',
+      first_last: 'first and last in sequences',
+      day_night_activities: 'day and night activities',
+      indian_traditional: 'Indian traditional and modern items',
+      bigger_smaller_number: 'bigger and smaller numbers',
+      soft_hard: 'soft and hard objects',
+      sweet_sour: 'sweet and sour tastes',
+      trace_shape_matching: 'matching shapes to outlines',
+      birds: 'birds',
+      more_animals: 'different types of animals',
+      daily_habits: 'daily habits and morning routines',
+      utensils_eating: 'utensils like spoon, plate, cup, bowl, fork, knife'
+    };
+
+    // Step 1: Check pool first
     const poolQuestions = getRandomQuestionsFromPool(catKey, 7);
+    const currentPool = getQuestionPool(catKey);
     
     if (poolQuestions.length >= 5) {
-      // Start game immediately with pool questions (need at least 5 for WIN_CONDITION)
+      // Start game immediately with pool questions
       console.log('Using questions from pool:', poolQuestions.length);
       setQuestionQueue(poolQuestions);
       setCategory(catKey);
       setScore(0);
       setShowReward(false);
-      setIsGeneratingQuestions(false); // No loading screen needed!
-    } else {
-      // Not enough in pool, show loading and generate first batch
-      setIsGeneratingQuestions(true);
-    }
-
-    // Step 2: Generate new questions in background (while user plays)
-    try {
-      const categoryTopics = {
-        tall_short: 'tall and short objects',
-        big_small: 'big and small objects',
-        colors: 'colors and colored objects',
-        counting: 'counting numbers 1 to 5',
-        fast_slow: 'fast and slow things',
-        hot_cold: 'hot and cold things',
-        more_less: 'more and less quantities',
-        fat_thin: 'fat and thin objects',
-        superhero: 'superheroes',
-        math_numbers: 'numbers 1 to 10',
-        alphabet: 'alphabet letters A to Z',
-        shapes: 'shapes like circle, square, triangle',
-        body_parts: 'body parts',
-        opposites: 'opposites like up/down, in/out',
-        animals: 'animals and their sounds',
-        food: 'food items',
-        transportation: 'vehicles and transportation',
-        emotions: 'emotions and feelings',
-        weather: 'weather conditions',
-        simple_addition: 'simple addition 1+1 to 5+5',
-        find_object: 'finding objects among options',
-        patterns: 'completing patterns',
-        habits: 'good habits and bad habits',
-        vegetables_fruits: 'vegetables and fruits',
-        places_india: 'places in India',
-        important_people: 'important people like doctor, teacher',
-        temples_gods: 'Indian temples and gods',
-        heavy_light: 'heavy and light objects',
-        family: 'family members',
-        seasons: 'seasons like summer, winter, rainy',
-        time_of_day: 'time of day like morning, afternoon, night',
-        indoor_outdoor: 'indoor and outdoor activities',
-        loud_quiet: 'loud and quiet sounds',
-        clean_dirty: 'clean and dirty things',
-        healthy_unhealthy: 'healthy and unhealthy food',
-        can_fly: 'things that can fly',
-        water_land: 'animals that live in water or on land',
-        musical_instruments: 'musical instruments',
-        indian_festivals: 'Indian festivals',
-        body_movements: 'body movements like jump, run, sit',
-        same_different: 'same and different objects',
-        living_nonliving: 'living and non-living things',
-        safe_unsafe: 'safe and unsafe things',
-        first_last: 'first and last in sequences',
-        day_night_activities: 'day and night activities',
-        indian_traditional: 'Indian traditional and modern items',
-        bigger_smaller_number: 'bigger and smaller numbers',
-        soft_hard: 'soft and hard objects',
-        sweet_sour: 'sweet and sour tastes',
-        trace_shape_matching: 'matching shapes to outlines',
-        birds: 'birds',
-        more_animals: 'different types of animals',
-        daily_habits: 'daily habits and morning routines',
-        utensils_eating: 'utensils like spoon, plate, cup, bowl, fork, knife'
-      };
-
-      const topic = categoryTopics[catKey] || catKey;
+      setIsGeneratingQuestions(false);
       
-      console.log('Generating new AI questions in background for:', catKey);
+      // Step 2: Generate in background ONLY if pool is low (< 15) and wait 5 seconds
+      if (currentPool.length < 15) {
+        setTimeout(async () => {
+          try {
+            const topic = categoryTopics[catKey] || catKey;
+            const response = await fetch('/api/generate-questions', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ category: catKey, topic })
+            });
+            
+            if (response.ok) {
+              const data = await response.json();
+              if (data.questions && data.questions.length > 0) {
+                saveQuestionPool(catKey, data.questions);
+                console.log('Background: saved', data.questions.length, 'questions to pool');
+              }
+            }
+          } catch (error) {
+            // Silently fail - user is playing
+          }
+        }, 5000); // Wait 5 seconds before background generation
+      }
+      return;
+    }
+    
+    // Step 3: No pool available - generate immediately (with loading screen)
+    setIsGeneratingQuestions(true);
+    try {
+      const topic = categoryTopics[catKey] || catKey;
       const response = await fetch('/api/generate-questions', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ category: catKey, topic })
       });
 
-      console.log('Response status:', response.status);
-      
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        console.error('API error:', errorData);
-        
-        // If no pool questions were used, fallback to static
-        if (poolQuestions.length === 0) {
-          if (learningModules[catKey]) {
-            const questions = shuffleArray([...learningModules[catKey]]);
-            setQuestionQueue(questions);
-            setCategory(catKey);
-            setScore(0);
-            setShowReward(false);
-          }
-        }
-        return; // Don't throw, just return (user is already playing)
-      }
-
-      const data = await response.json();
-      console.log('Received AI questions:', data.questions?.length || 0);
-      
-      if (data.questions && data.questions.length > 0) {
-        // Save new questions to pool
-        saveQuestionPool(catKey, data.questions);
-        console.log('Saved', data.questions.length, 'new questions to pool');
-        
-        // If we started with pool questions, we can optionally add more to queue
-        // But for now, just save to pool for next time
-      } else if (poolQuestions.length === 0) {
-        // No questions received and no pool, use static
-        if (learningModules[catKey]) {
-          const questions = shuffleArray([...learningModules[catKey]]);
+      if (response.ok) {
+        const data = await response.json();
+        if (data.questions && data.questions.length > 0) {
+          const questions = shuffleArray(data.questions);
+          saveQuestionPool(catKey, data.questions);
           setQuestionQueue(questions);
           setCategory(catKey);
           setScore(0);
           setShowReward(false);
+          setIsGeneratingQuestions(false);
+          return;
         }
       }
     } catch (error) {
-      console.error('Error generating questions in background:', error);
-      // If no pool questions were used, fallback to static
-      if (poolQuestions.length === 0) {
-        if (learningModules[catKey]) {
-          const questions = shuffleArray([...learningModules[catKey]]);
-          setQuestionQueue(questions);
-          setCategory(catKey);
-          setScore(0);
-          setShowReward(false);
-        }
-      }
-    } finally {
-      setIsGeneratingQuestions(false);
+      console.error('Error generating questions:', error);
     }
+    
+    // Final fallback to static
+    if (learningModules[catKey]) {
+      const questions = shuffleArray([...learningModules[catKey]]);
+      setQuestionQueue(questions);
+      setCategory(catKey);
+      setScore(0);
+      setShowReward(false);
+    }
+    setIsGeneratingQuestions(false);
   };
 
   const startCategory = (catKey) => {
