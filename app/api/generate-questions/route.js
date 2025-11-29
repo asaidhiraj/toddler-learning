@@ -72,17 +72,12 @@ Make sure each question is different and creative. Use appropriate emojis for ic
     console.log('Calling Gemini 2.5 Flash API...');
     
     // Use retry logic for rate limits
-    // Using gemini-2.5-flash (matches your example)
+    // Using gemini-2.5-flash (matches your example exactly)
     const response = await retryWithBackoff(async () => {
       try {
         const result = await ai.models.generateContent({
-          model: 'gemini-2.5-flash', // Using the model from your example
+          model: 'gemini-2.5-flash',
           contents: prompt,
-          // Optional configuration
-          config: {
-            temperature: 0.7,
-            maxOutputTokens: 2048,
-          },
         });
         return result;
       } catch (error) {
@@ -95,7 +90,7 @@ Make sure each question is different and creative. Use appropriate emojis for ic
       }
     });
     
-    // Response.text is directly accessible (not a function)
+    // Response.text is directly accessible (not a function) - matches your example
     const text = response.text;
     console.log('Received response from Gemini, length:', text.length);
     
