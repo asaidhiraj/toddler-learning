@@ -321,24 +321,37 @@ export default function Home() {
 
       const topic = categoryTopics[catKey] || catKey;
       
+      console.log('Fetching AI questions for:', catKey);
       const response = await fetch('/api/generate-questions', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ category: catKey, topic })
       });
 
+      console.log('Response status:', response.status);
+      
       if (!response.ok) {
-        throw new Error('Failed to generate questions');
+        const errorData = await response.json().catch(() => ({}));
+        console.error('API error:', errorData);
+        throw new Error(errorData.error || 'Failed to generate questions');
       }
 
       const data = await response.json();
+      console.log('Received AI questions:', data.questions?.length || 0);
+      
+      if (!data.questions || data.questions.length === 0) {
+        throw new Error('No questions received from AI');
+      }
+
       const questions = shuffleArray(data.questions);
+      console.log('Using AI-generated questions');
       setQuestionQueue(questions);
       setCategory(catKey);
       setScore(0);
       setShowReward(false);
     } catch (error) {
       console.error('Error generating questions:', error);
+      console.warn('Falling back to static questions');
       // Fallback to static questions if AI generation fails
       if (learningModules[catKey]) {
         const questions = shuffleArray([...learningModules[catKey]]);
@@ -753,6 +766,13 @@ export default function Home() {
       )}
 
       {/* Question Text */}
+      <div className="w-full max-w-3xl text-center mb-4">
+        {useAIQuestions && (
+          <div className="inline-block px-4 py-2 bg-green-100 text-green-800 text-lg font-bold rounded-full mb-2">
+            🤖 AI Generated
+          </div>
+        )}
+      </div>
       <h2 className="text-4xl md:text-6xl font-black text-slate-800 mb-8 text-center leading-tight mt-12">{currentQ.q}</h2>
       
       {/* Special Display for Counting, Math, Alphabet, and Shape Matching */}
