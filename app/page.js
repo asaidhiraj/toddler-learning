@@ -42,6 +42,13 @@ export default function Home() {
   const [showParentMode, setShowParentMode] = useState(false);
   const [showHint, setShowHint] = useState(false);
   const [isGeneratingQuestions, setIsGeneratingQuestions] = useState(false);
+  const [useAIQuestions, setUseAIQuestions] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('toddlerAppUseAI');
+      return saved ? JSON.parse(saved) : true; // Default to AI
+    }
+    return true;
+  });
 
   const WIN_CONDITION = 5; // He needs 5 right answers to get the big reward
 
@@ -346,8 +353,19 @@ export default function Home() {
   };
 
   const startCategory = (catKey) => {
-    // Use AI to generate questions dynamically
-    generateQuestionsWithAI(catKey);
+    // Use AI if enabled, otherwise use static questions
+    if (useAIQuestions) {
+      generateQuestionsWithAI(catKey);
+    } else {
+      // Use static questions directly
+      if (learningModules[catKey]) {
+        const questions = shuffleArray([...learningModules[catKey]]);
+        setQuestionQueue(questions);
+        setCategory(catKey);
+        setScore(0);
+        setShowReward(false);
+      }
+    }
   };
 
   const handleAnswer = (choice) => {
@@ -587,12 +605,25 @@ export default function Home() {
       <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-sky-100 via-purple-100 to-pink-100 p-4">
         <div className="w-full max-w-3xl flex justify-between items-center mb-4">
           <div className="text-2xl font-bold text-purple-700">⭐ {totalStars} Stars</div>
-          <button
-            onClick={() => setShowParentMode(true)}
-            className="px-4 py-2 bg-indigo-500 text-white text-lg rounded-full font-bold shadow-lg"
-          >
-            📊 Stats
-          </button>
+          <div className="flex gap-2">
+            <button
+              onClick={() => {
+                const newValue = !useAIQuestions;
+                setUseAIQuestions(newValue);
+                localStorage.setItem('toddlerAppUseAI', JSON.stringify(newValue));
+              }}
+              className={`px-4 py-2 ${useAIQuestions ? 'bg-green-500' : 'bg-gray-400'} text-white text-lg rounded-full font-bold shadow-lg`}
+              title={useAIQuestions ? 'AI Questions ON - Click to use static questions' : 'Static Questions ON - Click to use AI questions'}
+            >
+              {useAIQuestions ? '🤖 AI' : '📚 Static'}
+            </button>
+            <button
+              onClick={() => setShowParentMode(true)}
+              className="px-4 py-2 bg-indigo-500 text-white text-lg rounded-full font-bold shadow-lg"
+            >
+              📊 Stats
+            </button>
+          </div>
         </div>
         
         <h1 className="text-5xl font-black text-sky-800 mb-8 tracking-tight">Let's Play! 🚀</h1>
