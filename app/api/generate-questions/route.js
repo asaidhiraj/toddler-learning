@@ -44,7 +44,7 @@ export async function POST(request) {
     }
     console.log('API key found, length:', apiKey.length);
 
-    // Initialize with API key
+    // Initialize with API key (matches your example)
     const ai = new GoogleGenAI({ apiKey: apiKey });
 
     const prompt = `Generate 7 educational questions for a 3.5-year-old child learning about "${topic || category}".
@@ -69,15 +69,20 @@ Return ONLY a JSON array with this exact format:
 
 Make sure each question is different and creative. Use appropriate emojis for icons.`;
 
-    console.log('Calling Gemini 1.5 Flash API...');
+    console.log('Calling Gemini 2.5 Flash API...');
     
     // Use retry logic for rate limits
-    // Using gemini-1.5-flash (older, more stable, better rate limits)
+    // Using gemini-2.5-flash (matches your example)
     const response = await retryWithBackoff(async () => {
       try {
         const result = await ai.models.generateContent({
-          model: "gemini-1.5-flash", // Older, more stable model with better rate limits
+          model: 'gemini-2.5-flash', // Using the model from your example
           contents: prompt,
+          // Optional configuration
+          config: {
+            temperature: 0.7,
+            maxOutputTokens: 2048,
+          },
         });
         return result;
       } catch (error) {
@@ -90,8 +95,8 @@ Make sure each question is different and creative. Use appropriate emojis for ic
       }
     });
     
-    // The response structure might vary - try both .text and .text()
-    const text = typeof response.text === 'function' ? response.text() : response.text;
+    // Response.text is directly accessible (not a function)
+    const text = response.text;
     console.log('Received response from Gemini, length:', text.length);
     
     // Extract JSON from the response (handle markdown code blocks if present)
