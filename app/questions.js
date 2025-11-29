@@ -498,6 +498,15 @@ export const learningModules = {
     { q: "What do we use to PICK food?", a: { txt: "Fork", icon: "🍴", imageUrl: getImageUrl("fork utensil", 400, 400) }, b: { txt: "Plate", icon: "🍽️", imageUrl: getImageUrl("plate", 400, 400) }, correct: 'a' },
     { q: "What do we put SOUP in?", a: { txt: "Bowl", icon: "🥣", imageUrl: getImageUrl("bowl soup", 400, 400) }, b: { txt: "Cup", icon: "☕", imageUrl: getImageUrl("cup", 400, 400) }, correct: 'a' },
     { q: "What do we EAT with?", a: { txt: "Spoon", icon: "🥄", imageUrl: getImageUrl("spoon eating food", 400, 400) }, b: { txt: "Toy", icon: "🧸", imageUrl: getImageUrl("toy", 400, 400) }, correct: 'a' },
+  ],
+  space: [
+    { q: "Which one is the SUN?", a: { txt: "Sun", icon: "☀️", imageUrl: getImageUrl("sun bright star", 400, 400) }, b: { txt: "Moon", icon: "🌙", imageUrl: getImageUrl("moon night", 400, 400) }, correct: 'a' },
+    { q: "Which one is the MOON?", a: { txt: "Sun", icon: "☀️", imageUrl: getImageUrl("sun", 400, 400) }, b: { txt: "Moon", icon: "🌙", imageUrl: getImageUrl("moon crescent", 400, 400) }, correct: 'b' },
+    { q: "Which is a PLANET?", a: { txt: "Earth", icon: "🌍", imageUrl: getImageUrl("earth planet", 400, 400) }, b: { txt: "Star", icon: "⭐", imageUrl: getImageUrl("star twinkle", 400, 400) }, correct: 'a' },
+    { q: "Which is a PLANET?", a: { txt: "Mars", icon: "🔴", imageUrl: getImageUrl("mars red planet", 400, 400) }, b: { txt: "Asteroid", icon: "☄️", imageUrl: getImageUrl("asteroid space rock", 400, 400) }, correct: 'a' },
+    { q: "Which is a GALAXY?", a: { txt: "Galaxy", icon: "🌌", imageUrl: getImageUrl("galaxy stars space", 400, 400) }, b: { txt: "Cloud", icon: "☁️", imageUrl: getImageUrl("cloud sky", 400, 400) }, correct: 'a' },
+    { q: "Which is an ASTEROID?", a: { txt: "Asteroid", icon: "☄️", imageUrl: getImageUrl("asteroid meteor space", 400, 400) }, b: { txt: "Planet", icon: "🪐", imageUrl: getImageUrl("saturn planet", 400, 400) }, correct: 'a' },
+    { q: "Which is in SPACE?", a: { txt: "Rocket", icon: "🚀", imageUrl: getImageUrl("rocket space ship", 400, 400) }, b: { txt: "Car", icon: "🚗", imageUrl: getImageUrl("car vehicle", 400, 400) }, correct: 'a' },
   ]
 };
 

@@ -385,7 +385,8 @@ export default function Home() {
       birds: 'birds',
       more_animals: 'different types of animals',
       daily_habits: 'daily habits and morning routines',
-      utensils_eating: 'utensils like spoon, plate, cup, bowl, fork, knife'
+      utensils_eating: 'utensils like spoon, plate, cup, bowl, fork, knife',
+      space: 'space, sun, moon, planets, galaxy, asteroid, stars'
     };
 
     // Step 1: Check pool first
@@ -696,7 +697,8 @@ export default function Home() {
       birds: 'Birds',
       more_animals: 'More Animals',
       daily_habits: 'Daily Habits',
-      utensils_eating: 'Utensils & Eating'
+      utensils_eating: 'Utensils & Eating',
+      space: 'Space & Planets'
     };
     
     return (
@@ -846,6 +848,7 @@ export default function Home() {
           <MenuButton onClick={() => startCategory('more_animals')} color="bg-amber-300" label="🐅 More Animals" />
           <MenuButton onClick={() => startCategory('daily_habits')} color="bg-green-300" label="🌅 Daily Habits" />
           <MenuButton onClick={() => startCategory('utensils_eating')} color="bg-orange-300" label="🍽️ Utensils" />
+          <MenuButton onClick={() => startCategory('space')} color="bg-indigo-600" label="🚀 Space & Planets" />
         </div>
       </div>
     );
