@@ -75,6 +75,7 @@ export default function Home() {
     }
     return true;
   });
+  const audioContextRef = useRef(null);
 
   const WIN_CONDITION = 5; // He needs 5 right answers to get the big reward
 
@@ -212,15 +213,55 @@ export default function Home() {
   }, [stickers, totalStars, gamesPlayed]);
 
   // --- AUDIO ENGINE ---
+  // Initialize audio context on user interaction
+  useEffect(() => {
+    const initAudio = () => {
+      if (!audioContextRef.current) {
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        if (AudioContextClass) {
+          audioContextRef.current = new AudioContextClass();
+          // Resume immediately if suspended
+          if (audioContextRef.current.state === 'suspended') {
+            audioContextRef.current.resume().catch(err => console.log('Audio resume failed:', err));
+          }
+        }
+      }
+    };
+    
+    // Initialize on first user interaction
+    const events = ['click', 'touchstart', 'keydown'];
+    events.forEach(event => {
+      document.addEventListener(event, initAudio, { once: true });
+    });
+    
+    return () => {
+      events.forEach(event => {
+        document.removeEventListener(event, initAudio);
+      });
+    };
+  }, []);
+
   const playSound = (type) => {
     try {
       const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-      if (!AudioContextClass) return;
+      if (!AudioContextClass) {
+        console.log('AudioContext not supported');
+        return;
+      }
       
-      const audioCtx = new AudioContextClass();
+      // Use existing context or create new one
+      let audioCtx = audioContextRef.current;
+      if (!audioCtx || audioCtx.state === 'closed') {
+        audioCtx = new AudioContextClass();
+        audioContextRef.current = audioCtx;
+      }
+      
       // Resume audio context if suspended (required by some browsers)
       if (audioCtx.state === 'suspended') {
-        audioCtx.resume();
+        audioCtx.resume().catch(err => {
+          console.log('Audio resume failed:', err);
+          return;
+        });
       }
       
       const oscillator = audioCtx.createOscillator();
@@ -286,7 +327,11 @@ export default function Home() {
       oscillator.stop(audioCtx.currentTime + 0.2);
     }
     } catch (error) {
-      console.log('Sound playback error:', error);
+      console.error('Sound playback error:', error);
+      // Try to create a new context if the old one failed
+      if (audioContextRef.current && audioContextRef.current.state === 'closed') {
+        audioContextRef.current = null;
+      }
     }
   };
 
@@ -294,11 +339,23 @@ export default function Home() {
   const playAnimalSound = (animal) => {
     try {
       const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-      if (!AudioContextClass) return;
+      if (!AudioContextClass) {
+        console.log('AudioContext not supported for animal sound');
+        return;
+      }
       
-      const audioCtx = new AudioContextClass();
+      // Use existing context or create new one
+      let audioCtx = audioContextRef.current;
+      if (!audioCtx || audioCtx.state === 'closed') {
+        audioCtx = new AudioContextClass();
+        audioContextRef.current = audioCtx;
+      }
+      
       if (audioCtx.state === 'suspended') {
-        audioCtx.resume();
+        audioCtx.resume().catch(err => {
+          console.log('Audio resume failed for animal sound:', err);
+          return;
+        });
       }
       
       const sounds = {
@@ -428,8 +485,7 @@ export default function Home() {
       return;
     }
     
-    // Step 3: No pool available - generate immediately (with loading screen)
-    setIsGeneratingQuestions(true);
+    // Step 3: No pool available - generate immediately (loading screen already shown)
     
     // Add timeout to prevent hanging
     const timeoutId = setTimeout(() => {
@@ -896,8 +952,8 @@ export default function Home() {
           <div className="absolute bottom-8 right-1/4 text-5xl animate-bounce" style={{ animationDelay: '0.3s', animationDuration: '0.75s' }}>✨</div>
           <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-9xl animate-pulse">🤖</div>
         </div>
-        <h2 className="text-5xl font-black text-purple-700 mb-4 animate-pulse">Creating Magic Questions...</h2>
-        <p className="text-2xl text-purple-600 animate-pulse">AI is thinking super fast! 🚀</p>
+        <h2 className="text-5xl font-black text-purple-700 mb-4 drop-shadow-lg animate-pulse">Creating Magic Questions<span className="inline-block animate-pulse" style={{ animationDelay: '0s' }}>.</span><span className="inline-block animate-pulse" style={{ animationDelay: '0.2s' }}>.</span><span className="inline-block animate-pulse" style={{ animationDelay: '0.4s' }}>.</span></h2>
+        <p className="text-2xl text-purple-600 font-semibold animate-pulse">AI is thinking super fast! 🚀</p>
         <div className="mt-8 flex gap-2">
           <div className="w-3 h-3 bg-purple-500 rounded-full animate-bounce" style={{ animationDelay: '0s' }}></div>
           <div className="w-3 h-3 bg-pink-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
