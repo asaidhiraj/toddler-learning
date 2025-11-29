@@ -1,4 +1,4 @@
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import { GoogleGenAI } from "@google/genai";
 
 export async function POST(request) {
   try {
@@ -12,9 +12,8 @@ export async function POST(request) {
     }
     console.log('API key found, length:', apiKey.length);
 
-    const genAI = new GoogleGenerativeAI(apiKey);
-    // Use Gemini 3.0 (latest model)
-    const model = genAI.getGenerativeModel({ model: 'gemini-3.0' });
+    // Initialize with API key - the package may also read from GOOGLE_API_KEY env var
+    const ai = new GoogleGenAI({ apiKey: apiKey });
 
     const prompt = `Generate 7 educational questions for a 3.5-year-old child learning about "${topic || category}".
 
@@ -38,10 +37,14 @@ Return ONLY a JSON array with this exact format:
 
 Make sure each question is different and creative. Use appropriate emojis for icons.`;
 
-    console.log('Calling Gemini API...');
-    const result = await model.generateContent(prompt);
-    const response = await result.response;
-    const text = response.text();
+    console.log('Calling Gemini 3.0 API...');
+    const response = await ai.models.generateContent({
+      model: "gemini-3-pro-preview",
+      contents: prompt,
+    });
+    
+    // The response structure might vary - try both .text and .text()
+    const text = typeof response.text === 'function' ? response.text() : response.text;
     console.log('Received response from Gemini, length:', text.length);
     
     // Extract JSON from the response (handle markdown code blocks if present)
