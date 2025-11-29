@@ -720,10 +720,23 @@ export default function Home() {
   // --- SCREEN: LOADING (Generating Questions) ---
   if (isGeneratingQuestions) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-purple-100 to-pink-100 p-4">
-        <div className="text-6xl mb-4 animate-spin">🤖</div>
-        <h2 className="text-4xl font-black text-purple-700 mb-4">Creating New Questions...</h2>
-        <p className="text-2xl text-purple-600">Using AI to make learning fun! ✨</p>
+      <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-purple-100 via-pink-100 to-yellow-100 p-4">
+        <div className="relative w-64 h-64 mb-8">
+          {/* Dancing emojis with different animations */}
+          <div className="absolute top-0 left-1/2 transform -translate-x-1/2 text-8xl animate-bounce" style={{ animationDelay: '0s', animationDuration: '0.6s' }}>🎉</div>
+          <div className="absolute top-8 left-8 text-6xl animate-bounce" style={{ animationDelay: '0.2s', animationDuration: '0.7s' }}>🕺</div>
+          <div className="absolute top-8 right-8 text-6xl animate-bounce" style={{ animationDelay: '0.4s', animationDuration: '0.8s' }}>💃</div>
+          <div className="absolute bottom-8 left-1/4 text-5xl animate-bounce" style={{ animationDelay: '0.1s', animationDuration: '0.65s' }}>⭐</div>
+          <div className="absolute bottom-8 right-1/4 text-5xl animate-bounce" style={{ animationDelay: '0.3s', animationDuration: '0.75s' }}>✨</div>
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-9xl animate-pulse">🤖</div>
+        </div>
+        <h2 className="text-5xl font-black text-purple-700 mb-4 animate-pulse">Creating Magic Questions...</h2>
+        <p className="text-2xl text-purple-600 animate-pulse">AI is thinking super fast! 🚀</p>
+        <div className="mt-8 flex gap-2">
+          <div className="w-3 h-3 bg-purple-500 rounded-full animate-bounce" style={{ animationDelay: '0s' }}></div>
+          <div className="w-3 h-3 bg-pink-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+          <div className="w-3 h-3 bg-yellow-500 rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></div>
+        </div>
       </div>
     );
   }
