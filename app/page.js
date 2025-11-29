@@ -388,6 +388,9 @@ export default function Home() {
   };
 
   const generateQuestionsWithAI = async (catKey) => {
+    // Show loading animation immediately
+    setIsGeneratingQuestions(true);
+    
     const categoryTopics = {
       tall_short: 'tall and short objects',
       big_small: 'big and small objects',
@@ -453,6 +456,8 @@ export default function Home() {
     if (poolQuestions.length >= 5) {
       // Start game immediately with pool questions
       console.log('Using questions from pool:', poolQuestions.length);
+      // Show loading briefly (at least 500ms so user sees the animation)
+      await new Promise(resolve => setTimeout(resolve, 500));
       setQuestionQueue(poolQuestions);
       setCategory(catKey);
       setScore(0);
