@@ -599,10 +599,16 @@ export default function Home() {
     const rewardEmoji = category === 'superhero' ? '🦸' : category === 'math_numbers' ? '🔢' : category === 'alphabet' ? '📚' : category === 'simple_addition' ? '➕' : '🏆';
     const latestSticker = stickers[stickers.length - 1];
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-yellow-300 via-pink-300 to-purple-300 text-center p-4">
+      <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-yellow-300 via-pink-300 via-purple-300 to-blue-300 text-center p-4 relative overflow-hidden">
         <Confetti width={windowSize.width} height={windowSize.height} numberOfPieces={500} recycle={false} />
-        <div className="text-9xl mb-4 animate-bounce">{rewardEmoji}</div>
-        <h1 className="text-6xl font-black text-purple-700 mb-4 drop-shadow-md">YOU DID IT!</h1>
+        {/* Floating emojis */}
+        <div className="absolute top-10 left-10 text-7xl animate-bounce" style={{ animationDelay: '0s' }}>🎉</div>
+        <div className="absolute top-20 right-20 text-6xl animate-bounce" style={{ animationDelay: '0.5s' }}>⭐</div>
+        <div className="absolute bottom-20 left-20 text-5xl animate-bounce" style={{ animationDelay: '1s' }}>✨</div>
+        <div className="absolute bottom-10 right-10 text-6xl animate-bounce" style={{ animationDelay: '1.5s' }}>🎈</div>
+        
+        <div className="text-9xl mb-4 animate-bounce relative z-10" style={{ animationDuration: '0.8s' }}>{rewardEmoji}</div>
+        <h1 className="text-7xl md:text-8xl font-black mb-4 drop-shadow-2xl relative z-10 bg-gradient-to-r from-purple-600 via-pink-600 to-red-600 bg-clip-text text-transparent animate-pulse">YOU DID IT!</h1>
         {latestSticker && (
           <div className="mb-6">
             <p className="text-3xl font-bold text-purple-800 mb-2">You earned a sticker!</p>
@@ -615,13 +621,15 @@ export default function Home() {
         <div className="flex gap-4 flex-wrap justify-center">
           <button 
             onClick={() => startCategory(category)}
-            className="px-8 py-4 bg-purple-600 text-white text-2xl rounded-full font-bold shadow-xl border-b-8 border-purple-800 active:border-b-0 active:translate-y-2 transition-all"
+            className="px-10 py-5 bg-gradient-to-r from-purple-600 to-pink-600 text-white text-2xl rounded-full font-black shadow-2xl border-b-8 border-purple-800 hover:scale-110 active:scale-95 active:border-b-0 active:translate-y-2 transition-all transform relative z-10"
+            style={{ boxShadow: '0 15px 35px rgba(147, 51, 234, 0.4)' }}
           >
             Play Again 🔄
           </button>
           <button 
             onClick={resetGame}
-            className="px-8 py-4 bg-blue-500 text-white text-2xl rounded-full font-bold shadow-xl border-b-8 border-blue-700 active:border-b-0 active:translate-y-2 transition-all"
+            className="px-10 py-5 bg-gradient-to-r from-blue-500 to-cyan-500 text-white text-2xl rounded-full font-black shadow-2xl border-b-8 border-blue-700 hover:scale-110 active:scale-95 active:border-b-0 active:translate-y-2 transition-all transform relative z-10"
+            style={{ boxShadow: '0 15px 35px rgba(59, 130, 246, 0.4)' }}
           >
             New Game 🏠
           </button>
@@ -742,41 +750,48 @@ export default function Home() {
   // --- SCREEN: CATEGORY SELECTION ---
   if (!category) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-sky-100 via-purple-100 to-pink-100 p-4">
-        <div className="w-full max-w-3xl flex justify-between items-center mb-4">
-          <div className="text-2xl font-bold text-purple-700">⭐ {totalStars} Stars</div>
-          <div className="flex gap-2">
+      <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-pink-200 via-purple-200 via-blue-200 to-yellow-200 p-4 relative overflow-hidden">
+        {/* Animated background elements */}
+        <div className="absolute top-10 left-10 text-6xl animate-bounce" style={{ animationDelay: '0s', animationDuration: '3s' }}>⭐</div>
+        <div className="absolute top-20 right-20 text-5xl animate-bounce" style={{ animationDelay: '1s', animationDuration: '2.5s' }}>✨</div>
+        <div className="absolute bottom-20 left-20 text-4xl animate-bounce" style={{ animationDelay: '2s', animationDuration: '3.5s' }}>🎈</div>
+        <div className="absolute bottom-10 right-10 text-5xl animate-bounce" style={{ animationDelay: '0.5s', animationDuration: '2.8s' }}>🎉</div>
+        
+        <div className="w-full max-w-3xl flex justify-between items-center mb-4 relative z-10">
+          <div className="text-3xl font-black bg-gradient-to-r from-yellow-400 to-orange-400 bg-clip-text text-transparent drop-shadow-lg animate-pulse">⭐ {totalStars} Stars</div>
+          <div className="flex gap-3">
             <button
               onClick={() => {
                 const newValue = !useAIQuestions;
                 setUseAIQuestions(newValue);
                 localStorage.setItem('toddlerAppUseAI', JSON.stringify(newValue));
               }}
-              className={`px-4 py-2 ${useAIQuestions ? 'bg-green-500' : 'bg-gray-400'} text-white text-lg rounded-full font-bold shadow-lg`}
+              className={`px-5 py-3 ${useAIQuestions ? 'bg-gradient-to-r from-green-500 to-emerald-500' : 'bg-gradient-to-r from-gray-400 to-gray-500'} text-white text-lg rounded-full font-black shadow-xl border-b-4 border-black/30 hover:scale-110 active:scale-95 transition-all transform`}
               title={useAIQuestions ? 'AI Questions ON - Click to use static questions' : 'Static Questions ON - Click to use AI questions'}
             >
               {useAIQuestions ? '🤖 AI' : '📚 Static'}
             </button>
             <button
               onClick={() => setShowParentMode(true)}
-              className="px-4 py-2 bg-indigo-500 text-white text-lg rounded-full font-bold shadow-lg"
+              className="px-5 py-3 bg-gradient-to-r from-indigo-500 to-purple-500 text-white text-lg rounded-full font-black shadow-xl border-b-4 border-black/30 hover:scale-110 active:scale-95 transition-all transform"
             >
               📊 Stats
             </button>
           </div>
         </div>
         
-        <h1 className="text-5xl font-black text-sky-800 mb-8 tracking-tight">Let's Play! 🚀</h1>
+        <h1 className="text-6xl md:text-7xl font-black mb-8 tracking-tight relative z-10 bg-gradient-to-r from-purple-600 via-pink-600 to-red-600 bg-clip-text text-transparent drop-shadow-2xl animate-pulse">Let's Play! 🚀</h1>
         
         {/* Play a GAME Button - Prominent and Large */}
         <button
           onClick={playRandomGame}
-          className="mb-8 px-12 py-6 bg-gradient-to-r from-purple-600 to-pink-600 text-white text-3xl md:text-4xl font-black rounded-3xl shadow-2xl border-b-8 border-purple-800 hover:brightness-110 active:border-b-0 active:translate-y-2 transition-all animate-pulse hover:animate-none"
+          className="mb-10 px-16 py-8 bg-gradient-to-r from-purple-600 via-pink-600 to-red-600 text-white text-4xl md:text-5xl font-black rounded-3xl shadow-2xl border-b-8 border-purple-900 hover:brightness-110 hover:scale-105 active:border-b-0 active:translate-y-2 transition-all transform relative z-10 animate-bounce hover:animate-none"
+          style={{ boxShadow: '0 20px 40px rgba(147, 51, 234, 0.4)' }}
         >
           🎮 Play a GAME 🎮
         </button>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-4xl">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-4xl relative z-10">
           <MenuButton onClick={() => startCategory('tall_short')} color="bg-orange-400" label="🦒 Tall & Short" />
           <MenuButton onClick={() => startCategory('big_small')} color="bg-green-500" label="🐘 Big & Small" />
           <MenuButton onClick={() => startCategory('colors')} color="bg-pink-500" label="🎨 Colors" />
@@ -867,14 +882,19 @@ export default function Home() {
   const isAudioModule = category === 'math_numbers' || category === 'alphabet' || category === 'simple_addition';
 
   return (
-    <div className={`flex flex-col items-center justify-center min-h-screen p-4 transition-colors duration-300 ${feedback === 'correct' ? 'bg-green-200' : feedback === 'wrong' ? 'bg-red-200' : category === 'superhero' ? 'bg-gradient-to-br from-red-50 to-blue-50' : 'bg-white'}`}>
+    <div className={`flex flex-col items-center justify-center min-h-screen p-4 transition-all duration-500 ${feedback === 'correct' ? 'bg-gradient-to-br from-green-300 via-emerald-200 to-lime-200' : feedback === 'wrong' ? 'bg-gradient-to-br from-red-300 via-rose-200 to-pink-200' : category === 'superhero' ? 'bg-gradient-to-br from-red-100 via-blue-100 to-purple-100' : 'bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50'}`}>
       
       {/* Top Bar */}
-      <div className="w-full max-w-3xl flex justify-between items-center mb-8 absolute top-4 px-4">
-        <button onClick={resetGame} className="px-4 py-2 bg-gray-200 rounded-full font-bold text-gray-600">✕ Exit</button>
-        <div className="flex gap-1">
+      <div className="w-full max-w-3xl flex justify-between items-center mb-8 absolute top-4 px-4 z-20">
+        <button 
+          onClick={resetGame} 
+          className="px-5 py-3 bg-gradient-to-r from-gray-300 to-gray-400 rounded-full font-black text-gray-700 shadow-xl border-b-4 border-gray-600 hover:scale-110 active:scale-95 active:border-b-0 active:translate-y-1 transition-all transform"
+        >
+          ✕ Exit
+        </button>
+        <div className="flex gap-2 bg-white/80 backdrop-blur-sm px-4 py-2 rounded-full shadow-lg">
           {[...Array(WIN_CONDITION)].map((_, i) => (
-            <span key={i} className={`text-3xl transition-all ${i < score ? 'opacity-100 scale-125' : 'opacity-20 grayscale'}`}>⭐</span>
+            <span key={i} className={`text-4xl transition-all transform ${i < score ? 'opacity-100 scale-125 animate-bounce' : 'opacity-20 grayscale'}`} style={{ animationDelay: `${i * 0.1}s` }}>⭐</span>
           ))}
         </div>
       </div>
@@ -883,7 +903,7 @@ export default function Home() {
       {!showHint && (
         <button
           onClick={handleShowHint}
-          className="absolute top-20 right-4 px-4 py-2 bg-yellow-400 text-yellow-900 text-xl rounded-full font-bold shadow-lg border-b-4 border-yellow-600 active:border-b-0 active:translate-y-1 transition-all"
+          className="absolute top-20 right-4 px-5 py-3 bg-gradient-to-r from-yellow-400 to-orange-400 text-yellow-900 text-xl rounded-full font-black shadow-xl border-b-4 border-yellow-600 hover:scale-110 active:scale-95 active:border-b-0 active:translate-y-1 transition-all transform z-20"
         >
           💡 Hint
         </button>
@@ -891,9 +911,9 @@ export default function Home() {
 
       {/* Hint Display */}
       {showHint && questionQueue.length > 0 && (
-        <div className="absolute top-20 right-4 bg-yellow-100 border-4 border-yellow-400 rounded-2xl p-4 shadow-2xl z-10 max-w-xs">
-          <div className="text-2xl font-bold text-yellow-800 mb-2">💡 Hint:</div>
-          <div className="text-xl text-yellow-900">
+        <div className="absolute top-20 right-4 bg-gradient-to-br from-yellow-100 to-orange-100 border-4 border-yellow-400 rounded-3xl p-5 shadow-2xl z-20 max-w-xs animate-pulse">
+          <div className="text-2xl font-black text-yellow-800 mb-2">💡 Hint:</div>
+          <div className="text-xl text-yellow-900 font-bold">
             {category === 'find_object' && currentQ.options ? (
               <>Look for: {currentQ.options[currentQ.correct].txt} {currentQ.options[currentQ.correct].icon}</>
             ) : category === 'patterns' ? (
@@ -906,14 +926,14 @@ export default function Home() {
       )}
 
       {/* Question Text */}
-      <div className="w-full max-w-3xl text-center mb-4">
+      <div className="w-full max-w-3xl text-center mb-4 mt-16">
         {useAIQuestions && (
-          <div className="inline-block px-4 py-2 bg-green-100 text-green-800 text-lg font-bold rounded-full mb-2">
+          <div className="inline-block px-5 py-2 bg-gradient-to-r from-green-400 to-emerald-400 text-white text-lg font-black rounded-full mb-3 shadow-lg animate-pulse">
             🤖 AI Generated
           </div>
         )}
       </div>
-      <h2 className="text-4xl md:text-6xl font-black text-slate-800 mb-8 text-center leading-tight mt-12">{currentQ.q}</h2>
+      <h2 className="text-5xl md:text-7xl font-black mb-8 text-center leading-tight bg-gradient-to-r from-purple-600 via-pink-600 to-red-600 bg-clip-text text-transparent drop-shadow-lg animate-pulse">{currentQ.q}</h2>
       
       {/* Special Display for Counting, Math, Alphabet, and Shape Matching */}
       {(currentQ.display || currentQ.outline) && (
@@ -925,7 +945,7 @@ export default function Home() {
         <button
           onClick={handleReplaySound}
           disabled={isSpeaking}
-          className="mb-6 px-6 py-3 bg-blue-500 text-white text-xl rounded-full font-bold shadow-lg border-b-4 border-blue-700 active:border-b-0 active:translate-y-1 transition-all disabled:opacity-50"
+          className="mb-6 px-8 py-4 bg-gradient-to-r from-blue-500 to-cyan-500 text-white text-xl rounded-full font-black shadow-xl border-b-4 border-blue-700 hover:scale-110 active:scale-95 active:border-b-0 active:translate-y-1 transition-all transform disabled:opacity-50"
         >
           {isSpeaking ? '🔊 Playing...' : category === 'animals' ? '🔊 Hear Sound' : '🔊 Listen Again'}
         </button>
@@ -1014,9 +1034,13 @@ function MenuButton({ onClick, color, label }) {
   return (
     <button 
       onClick={onClick} 
-      className={`p-6 ${color} rounded-2xl shadow-lg border-b-8 border-black/20 text-white text-2xl md:text-3xl font-black hover:brightness-110 active:border-b-0 active:translate-y-2 transition-all flex items-center justify-center gap-2`}
+      className={`p-6 ${color} rounded-3xl shadow-2xl border-b-8 border-black/30 text-white text-2xl md:text-3xl font-black hover:brightness-110 hover:scale-105 hover:rotate-1 active:border-b-0 active:translate-y-2 active:scale-95 transition-all transform flex items-center justify-center gap-2 relative overflow-hidden group`}
+      style={{ 
+        boxShadow: '0 10px 25px rgba(0, 0, 0, 0.2)',
+      }}
     >
-      {label}
+      <span className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></span>
+      <span className="relative z-10">{label}</span>
     </button>
   );
 }
@@ -1027,21 +1051,23 @@ function GameButton({ option, onClick }) {
   return (
     <button
       onClick={onClick}
-      className="flex flex-col items-center justify-center p-6 md:p-10 bg-white rounded-3xl shadow-xl border-b-8 border-slate-200 hover:bg-blue-50 hover:border-blue-300 hover:-translate-y-1 active:border-b-0 active:translate-y-2 transition-all h-64"
+      className="flex flex-col items-center justify-center p-6 md:p-10 bg-gradient-to-br from-white to-blue-50 rounded-3xl shadow-2xl border-b-8 border-blue-300 hover:bg-gradient-to-br hover:from-blue-100 hover:to-purple-100 hover:border-purple-400 hover:-translate-y-2 hover:scale-105 active:border-b-0 active:translate-y-2 active:scale-95 transition-all transform h-64 group relative overflow-hidden"
+      style={{ boxShadow: '0 15px 35px rgba(59, 130, 246, 0.3)' }}
     >
+      <span className="absolute inset-0 bg-gradient-to-r from-purple-400/0 via-pink-400/20 to-purple-400/0 transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></span>
       {option.imageUrl && !imageError ? (
         <img 
           src={option.imageUrl} 
           alt={option.txt}
-          className="w-32 h-32 md:w-40 md:h-40 mb-4 object-cover rounded-lg drop-shadow-sm transform transition-transform hover:scale-110"
+          className="w-32 h-32 md:w-40 md:h-40 mb-4 object-cover rounded-2xl drop-shadow-lg transform transition-transform group-hover:scale-125 group-hover:rotate-6 relative z-10"
           onError={() => setImageError(true)}
         />
       ) : (
-        <span className="text-8xl md:text-9xl mb-4 drop-shadow-sm transform transition-transform hover:scale-110">
+        <span className="text-8xl md:text-9xl mb-4 drop-shadow-lg transform transition-transform group-hover:scale-125 group-hover:rotate-12 relative z-10">
           {option.icon}
         </span>
       )}
-      <span className="text-2xl md:text-4xl text-slate-600 font-bold">{option.txt}</span>
+      <span className="text-2xl md:text-4xl bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent font-black relative z-10">{option.txt}</span>
     </button>
   );
 }
