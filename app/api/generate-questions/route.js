@@ -69,13 +69,14 @@ Return ONLY a JSON array with this exact format:
 
 Make sure each question is different and creative. Use appropriate emojis for icons.`;
 
-    console.log('Calling Gemini 3.0 API...');
+    console.log('Calling Gemini 1.5 Flash API...');
     
     // Use retry logic for rate limits
+    // Using gemini-1.5-flash (older, more stable, better rate limits)
     const response = await retryWithBackoff(async () => {
       try {
         const result = await ai.models.generateContent({
-          model: "gemini-3-pro-preview",
+          model: "gemini-1.5-flash", // Older, more stable model with better rate limits
           contents: prompt,
         });
         return result;
