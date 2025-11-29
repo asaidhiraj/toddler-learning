@@ -435,7 +435,12 @@ export default function Home() {
       indian_traditional: 'Indian Traditional',
       bigger_smaller_number: 'Bigger/Smaller Number',
       soft_hard: 'Soft & Hard',
-      sweet_sour: 'Sweet & Sour'
+      sweet_sour: 'Sweet & Sour',
+      trace_shape_matching: 'Shape Matching',
+      birds: 'Birds',
+      more_animals: 'More Animals',
+      daily_habits: 'Daily Habits',
+      utensils_eating: 'Utensils & Eating'
     };
     
     return (
@@ -560,6 +565,11 @@ export default function Home() {
           <MenuButton onClick={() => startCategory('bigger_smaller_number')} color="bg-rose-400" label="🔢 Bigger Number" />
           <MenuButton onClick={() => startCategory('soft_hard')} color="bg-gray-400" label="🛏️ Soft & Hard" />
           <MenuButton onClick={() => startCategory('sweet_sour')} color="bg-yellow-400" label="🍬 Sweet & Sour" />
+          <MenuButton onClick={() => startCategory('trace_shape_matching')} color="bg-indigo-300" label="🔷 Shape Match" />
+          <MenuButton onClick={() => startCategory('birds')} color="bg-sky-300" label="🦅 Birds" />
+          <MenuButton onClick={() => startCategory('more_animals')} color="bg-amber-300" label="🐅 More Animals" />
+          <MenuButton onClick={() => startCategory('daily_habits')} color="bg-green-300" label="🌅 Daily Habits" />
+          <MenuButton onClick={() => startCategory('utensils_eating')} color="bg-orange-300" label="🍽️ Utensils" />
         </div>
       </div>
     );
@@ -613,9 +623,9 @@ export default function Home() {
       {/* Question Text */}
       <h2 className="text-4xl md:text-6xl font-black text-slate-800 mb-8 text-center leading-tight mt-12">{currentQ.q}</h2>
       
-      {/* Special Display for Counting, Math, and Alphabet */}
-      {currentQ.display && (
-        <DisplayContent question={currentQ} isAudioModule={isAudioModule} />
+      {/* Special Display for Counting, Math, Alphabet, and Shape Matching */}
+      {(currentQ.display || currentQ.outline) && (
+        <DisplayContent question={currentQ} isAudioModule={isAudioModule} category={category} />
       )}
 
       {/* Replay Sound Button for Audio Modules */}
@@ -672,9 +682,25 @@ export default function Home() {
 
 // --- SUB-COMPONENTS FOR CLEANER CODE ---
 
-function DisplayContent({ question, isAudioModule }) {
+function DisplayContent({ question, isAudioModule, category }) {
   const [imageError, setImageError] = useState(false);
   const showImage = question.displayImage && !imageError;
+  
+  // Special display for trace shape matching
+  if (category === 'trace_shape_matching' && question.outline) {
+    return (
+      <div className="mb-8 p-8 bg-gradient-to-br from-blue-50 to-purple-50 rounded-3xl shadow-inner border-4 border-blue-200 flex flex-col items-center justify-center">
+        <div className="text-3xl font-bold text-blue-800 mb-4">Trace the Shape:</div>
+        <div className="text-9xl md:text-[150px] font-black text-blue-600 mb-4" style={{ 
+          textShadow: '0 0 20px rgba(59, 130, 246, 0.5)',
+          filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.3))'
+        }}>
+          {question.outline}
+        </div>
+        <div className="text-2xl font-bold text-blue-700">Which shape matches?</div>
+      </div>
+    );
+  }
   
   return (
     <div className={`text-7xl mb-8 p-6 bg-slate-50 rounded-3xl shadow-inner border-4 border-slate-100 ${isAudioModule ? 'animate-pulse' : ''} flex items-center justify-center`}>
