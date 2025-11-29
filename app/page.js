@@ -1007,12 +1007,14 @@ export default function Home() {
         <div className="absolute top-20 right-4 bg-gradient-to-br from-yellow-100 to-orange-100 border-4 border-yellow-400 rounded-3xl p-5 shadow-2xl z-20 max-w-xs animate-pulse">
           <div className="text-2xl font-black text-yellow-800 mb-2">💡 Hint:</div>
           <div className="text-xl text-yellow-900 font-bold">
-            {category === 'find_object' && currentQ.options ? (
-              <>Look for: {currentQ.options[currentQ.correct].txt} {currentQ.options[currentQ.correct].icon}</>
+            {category === 'find_object' && currentQ.options && typeof currentQ.correct === 'number' ? (
+              <>Look for: {currentQ.options[currentQ.correct]?.txt || ''} {currentQ.options[currentQ.correct]?.icon || ''}</>
             ) : category === 'patterns' ? (
               <>The pattern repeats!</>
+            ) : currentQ.correct && currentQ[currentQ.correct] ? (
+              <>Look for: {currentQ[currentQ.correct]?.txt || ''} {currentQ[currentQ.correct]?.icon || ''}</>
             ) : (
-              <>Look for: {currentQ[currentQ.correct]?.txt} {currentQ[currentQ.correct]?.icon}</>
+              <>Look for the correct answer!</>
             )}
           </div>
         </div>
@@ -1027,9 +1029,9 @@ export default function Home() {
         )}
       </div>
       {category === 'trace_shape_matching' ? (
-        <h2 className="text-4xl md:text-5xl font-black mb-4 text-center leading-tight bg-gradient-to-r from-purple-600 via-pink-600 to-red-600 bg-clip-text text-transparent drop-shadow-lg">{currentQ.q}</h2>
+        <h2 className="text-4xl md:text-5xl font-black mb-4 text-center leading-tight bg-gradient-to-r from-purple-600 via-pink-600 to-red-600 bg-clip-text text-transparent drop-shadow-lg">{currentQ.q || 'Match this shape'}</h2>
       ) : (
-        <h2 className="text-5xl md:text-7xl font-black mb-8 text-center leading-tight bg-gradient-to-r from-purple-600 via-pink-600 to-red-600 bg-clip-text text-transparent drop-shadow-lg animate-pulse">{currentQ.q}</h2>
+        <h2 className="text-5xl md:text-7xl font-black mb-8 text-center leading-tight bg-gradient-to-r from-purple-600 via-pink-600 to-red-600 bg-clip-text text-transparent drop-shadow-lg animate-pulse">{currentQ.q || 'Choose the answer'}</h2>
       )}
       
       {/* Special Display for Counting, Math, Alphabet, and Shape Matching */}
@@ -1049,31 +1051,31 @@ export default function Home() {
       ) : null}
 
       {/* Answer Buttons */}
-      {category === 'find_object' && currentQ.options ? (
+      {category === 'find_object' && currentQ.options && Array.isArray(currentQ.options) ? (
         <div className="grid grid-cols-2 gap-6 w-full max-w-3xl">
           {currentQ.options.map((option, index) => (
-            <GameButton key={index} option={option} onClick={() => handleAnswer(index)} />
+            <GameButton key={index} option={option || { txt: 'Option', icon: '❓' }} onClick={() => handleAnswer(index)} />
           ))}
         </div>
       ) : category === 'patterns' && currentQ.pattern ? (
         <div className="w-full max-w-3xl">
           <div className="mb-6 p-4 bg-blue-50 rounded-2xl">
             <div className="text-4xl md:text-5xl flex justify-center gap-2 mb-4 flex-wrap">
-              {currentQ.pattern.map((item, i) => (
-                <span key={i}>{item}</span>
+              {Array.isArray(currentQ.pattern) && currentQ.pattern.map((item, i) => (
+                <span key={i}>{item || '?'}</span>
               ))}
               <span className="text-gray-400">?</span>
             </div>
           </div>
           <div className="grid grid-cols-2 gap-6">
-            <GameButton option={currentQ.options[0]} onClick={() => handleAnswer('a')} />
-            <GameButton option={currentQ.options[1]} onClick={() => handleAnswer('b')} />
+            <GameButton option={currentQ.options?.[0]} onClick={() => handleAnswer('a')} />
+            <GameButton option={currentQ.options?.[1]} onClick={() => handleAnswer('b')} />
           </div>
         </div>
       ) : (
         <div className="grid grid-cols-2 gap-6 w-full max-w-3xl">
-          <GameButton option={currentQ.a} onClick={() => handleAnswer('a')} />
-          <GameButton option={currentQ.b} onClick={() => handleAnswer('b')} />
+          <GameButton option={currentQ?.a} onClick={() => handleAnswer('a')} />
+          <GameButton option={currentQ?.b} onClick={() => handleAnswer('b')} />
         </div>
       )}
 
@@ -1132,7 +1134,7 @@ function DisplayContent({ question, isAudioModule, category }) {
           onError={() => setImageError(true)}
         />
       ) : (
-        <span className="text-6xl md:text-8xl font-black">{question.display}</span>
+        <span className="text-6xl md:text-8xl font-black">{question.display || question.outline || '?'}</span>
       )}
     </div>
   );
@@ -1156,6 +1158,19 @@ function MenuButton({ onClick, color, label }) {
 function GameButton({ option, onClick }) {
   const [imageError, setImageError] = useState(false);
   
+  // Safety check - ensure option exists and has required properties
+  if (!option || typeof option !== 'object') {
+    return (
+      <button
+        onClick={onClick}
+        className="flex flex-col items-center justify-center p-6 md:p-10 bg-gradient-to-br from-gray-100 to-gray-200 rounded-3xl shadow-2xl border-b-8 border-gray-400"
+      >
+        <span className="text-8xl mb-4">❓</span>
+        <span className="text-2xl font-black text-gray-600">Invalid Option</span>
+      </button>
+    );
+  }
+  
   return (
     <button
       onClick={onClick}
@@ -1166,16 +1181,16 @@ function GameButton({ option, onClick }) {
       {option.imageUrl && !imageError ? (
         <img 
           src={option.imageUrl} 
-          alt={option.txt}
+          alt={option?.txt || 'Option image'}
           className="w-32 h-32 md:w-40 md:h-40 mb-4 object-cover rounded-2xl drop-shadow-lg transform transition-transform group-hover:scale-125 group-hover:rotate-6 relative z-10"
           onError={() => setImageError(true)}
         />
       ) : (
         <span className="text-8xl md:text-9xl mb-4 drop-shadow-lg transform transition-transform group-hover:scale-125 group-hover:rotate-12 relative z-10">
-          {option.icon}
+          {option?.icon || '❓'}
         </span>
       )}
-      <span className="text-2xl md:text-4xl bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent font-black relative z-10">{option.txt}</span>
+      <span className="text-2xl md:text-4xl bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent font-black relative z-10">{option?.txt || 'Option'}</span>
     </button>
   );
 }
