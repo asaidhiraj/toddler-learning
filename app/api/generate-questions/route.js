@@ -47,27 +47,10 @@ export async function POST(request) {
     // Initialize with API key (matches your example)
     const ai = new GoogleGenAI({ apiKey: apiKey });
 
-    const prompt = `Generate 7 educational questions for a 3.5-year-old child learning about "${topic || category}".
-
-Each question should:
-- Be simple and age-appropriate
-- Have exactly 2 answer options (a and b)
-- Have one correct answer
-- Be fun and engaging
-- Use simple words
-
-Return ONLY a JSON array with this exact format:
-[
-  {
-    "q": "Question text here?",
-    "a": { "txt": "Option A text", "icon": "emoji" },
-    "b": { "txt": "Option B text", "icon": "emoji" },
-    "correct": "a"
-  },
-  ...
-]
-
-Make sure each question is different and creative. Use appropriate emojis for icons.`;
+    // Optimized shorter prompt for faster generation
+    const prompt = `Generate 7 simple questions for a 3.5-year-old about "${topic || category}". Each question has 2 options (a, b) with one correct answer. Return ONLY JSON array:
+[{"q":"Question?","a":{"txt":"Option A","icon":"emoji"},"b":{"txt":"Option B","icon":"emoji"},"correct":"a"},...]
+Use simple words and fun emojis.`;
 
     console.log('Calling Gemini 2.5 Flash API...');
     
