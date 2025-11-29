@@ -794,10 +794,13 @@ export default function Home() {
                 setUseAIQuestions(newValue);
                 localStorage.setItem('toddlerAppUseAI', JSON.stringify(newValue));
               }}
-              className={`px-5 py-3 ${useAIQuestions ? 'bg-gradient-to-r from-green-500 to-emerald-500' : 'bg-gradient-to-r from-gray-400 to-gray-500'} text-white text-lg rounded-full font-black shadow-xl border-b-4 border-black/30 hover:scale-110 active:scale-95 transition-all transform`}
-              title={useAIQuestions ? 'AI Questions ON - Click to use static questions' : 'Static Questions ON - Click to use AI questions'}
+              className={`px-6 py-3 ${useAIQuestions ? 'bg-gradient-to-r from-green-500 to-emerald-500' : 'bg-gradient-to-r from-gray-400 to-gray-500'} text-white text-lg rounded-full font-black shadow-xl border-b-4 border-black/30 hover:scale-110 active:scale-95 transition-all transform flex items-center gap-2`}
+              title={useAIQuestions ? 'AI is ON - Click to turn OFF (use static questions)' : 'AI is OFF - Click to turn ON (use AI questions)'}
             >
-              {useAIQuestions ? '🤖 AI' : '📚 Static'}
+              <span>🤖 AI</span>
+              <span className={`px-3 py-1 rounded-full text-sm font-black ${useAIQuestions ? 'bg-white text-green-600' : 'bg-gray-600 text-white'}`}>
+                {useAIQuestions ? 'ON' : 'OFF'}
+              </span>
             </button>
             <button
               onClick={() => setShowParentMode(true)}
