@@ -430,6 +430,20 @@ export default function Home() {
     
     // Step 3: No pool available - generate immediately (with loading screen)
     setIsGeneratingQuestions(true);
+    
+    // Add timeout to prevent hanging
+    const timeoutId = setTimeout(() => {
+      console.log('AI generation timeout, using static questions');
+      if (learningModules[catKey]) {
+        const questions = shuffleArray([...learningModules[catKey]]);
+        setQuestionQueue(questions);
+        setCategory(catKey);
+        setScore(0);
+        setShowReward(false);
+        setIsGeneratingQuestions(false);
+      }
+    }, 10000); // 10 second timeout
+    
     try {
       const topic = categoryTopics[catKey] || catKey;
       const response = await fetch('/api/generate-questions', {
@@ -437,6 +451,8 @@ export default function Home() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ category: catKey, topic })
       });
+
+      clearTimeout(timeoutId); // Clear timeout if request succeeds
 
       if (response.ok) {
         const data = await response.json();
@@ -452,18 +468,23 @@ export default function Home() {
         }
       }
     } catch (error) {
+      clearTimeout(timeoutId); // Clear timeout on error
       console.error('Error generating questions:', error);
     }
     
     // Final fallback to static
     if (learningModules[catKey]) {
+      console.log('Falling back to static questions for:', catKey);
       const questions = shuffleArray([...learningModules[catKey]]);
       setQuestionQueue(questions);
       setCategory(catKey);
       setScore(0);
       setShowReward(false);
+      setIsGeneratingQuestions(false);
+    } else {
+      console.error('No questions available for category:', catKey);
+      setIsGeneratingQuestions(false);
     }
-    setIsGeneratingQuestions(false);
   };
 
   const startCategory = (catKey) => {
@@ -591,7 +612,12 @@ export default function Home() {
 
   const playRandomGame = () => {
     const categories = Object.keys(learningModules);
+    if (categories.length === 0) {
+      console.error('No categories available');
+      return;
+    }
     const randomCategory = categories[Math.floor(Math.random() * categories.length)];
+    console.log('Playing random game:', randomCategory);
     startCategory(randomCategory);
   };
 
