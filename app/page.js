@@ -415,7 +415,27 @@ export default function Home() {
       important_people: 'Important People',
       temples_gods: 'Temples & Gods',
       heavy_light: 'Heavy & Light',
-      family: 'Family'
+      family: 'Family',
+      seasons: 'Seasons',
+      time_of_day: 'Time of Day',
+      indoor_outdoor: 'Indoor/Outdoor',
+      loud_quiet: 'Loud & Quiet',
+      clean_dirty: 'Clean & Dirty',
+      healthy_unhealthy: 'Healthy Food',
+      can_fly: 'Can Fly',
+      water_land: 'Water & Land',
+      musical_instruments: 'Musical Instruments',
+      indian_festivals: 'Indian Festivals',
+      body_movements: 'Body Movements',
+      same_different: 'Same/Different',
+      living_nonliving: 'Living Things',
+      safe_unsafe: 'Safe & Unsafe',
+      first_last: 'First & Last',
+      day_night_activities: 'Day/Night Activities',
+      indian_traditional: 'Indian Traditional',
+      bigger_smaller_number: 'Bigger/Smaller Number',
+      soft_hard: 'Soft & Hard',
+      sweet_sour: 'Sweet & Sour'
     };
     
     return (
@@ -520,6 +540,26 @@ export default function Home() {
           <MenuButton onClick={() => startCategory('temples_gods')} color="bg-yellow-600" label="🛕 Temples & Gods" />
           <MenuButton onClick={() => startCategory('heavy_light')} color="bg-gray-600" label="⚖️ Heavy & Light" />
           <MenuButton onClick={() => startCategory('family')} color="bg-pink-600" label="👨‍👩‍👧‍👦 Family" />
+          <MenuButton onClick={() => startCategory('seasons')} color="bg-orange-500" label="🍂 Seasons" />
+          <MenuButton onClick={() => startCategory('time_of_day')} color="bg-indigo-400" label="🌅 Time of Day" />
+          <MenuButton onClick={() => startCategory('indoor_outdoor')} color="bg-green-400" label="🏠 Indoor/Outdoor" />
+          <MenuButton onClick={() => startCategory('loud_quiet')} color="bg-red-400" label="🔊 Loud & Quiet" />
+          <MenuButton onClick={() => startCategory('clean_dirty')} color="bg-blue-300" label="🧼 Clean & Dirty" />
+          <MenuButton onClick={() => startCategory('healthy_unhealthy')} color="bg-emerald-400" label="🥗 Healthy Food" />
+          <MenuButton onClick={() => startCategory('can_fly')} color="bg-sky-400" label="🦅 Can Fly" />
+          <MenuButton onClick={() => startCategory('water_land')} color="bg-cyan-400" label="🌊 Water & Land" />
+          <MenuButton onClick={() => startCategory('musical_instruments')} color="bg-purple-400" label="🎵 Instruments" />
+          <MenuButton onClick={() => startCategory('indian_festivals')} color="bg-yellow-500" label="🎉 Festivals" />
+          <MenuButton onClick={() => startCategory('body_movements')} color="bg-pink-400" label="🏃 Movements" />
+          <MenuButton onClick={() => startCategory('same_different')} color="bg-violet-400" label="🔀 Same/Different" />
+          <MenuButton onClick={() => startCategory('living_nonliving')} color="bg-lime-400" label="🌱 Living Things" />
+          <MenuButton onClick={() => startCategory('safe_unsafe')} color="bg-red-300" label="🛡️ Safe & Unsafe" />
+          <MenuButton onClick={() => startCategory('first_last')} color="bg-teal-400" label="🔢 First & Last" />
+          <MenuButton onClick={() => startCategory('day_night_activities')} color="bg-slate-500" label="🌙 Day/Night" />
+          <MenuButton onClick={() => startCategory('indian_traditional')} color="bg-amber-400" label="🇮🇳 Traditional" />
+          <MenuButton onClick={() => startCategory('bigger_smaller_number')} color="bg-rose-400" label="🔢 Bigger Number" />
+          <MenuButton onClick={() => startCategory('soft_hard')} color="bg-gray-400" label="🛏️ Soft & Hard" />
+          <MenuButton onClick={() => startCategory('sweet_sour')} color="bg-yellow-400" label="🍬 Sweet & Sour" />
         </div>
       </div>
     );
