@@ -413,7 +413,9 @@ export default function Home() {
       vegetables_fruits: 'Vegetables & Fruits',
       places_india: 'Places in India',
       important_people: 'Important People',
-      temples_gods: 'Temples & Gods'
+      temples_gods: 'Temples & Gods',
+      heavy_light: 'Heavy & Light',
+      family: 'Family'
     };
     
     return (
@@ -516,6 +518,8 @@ export default function Home() {
           <MenuButton onClick={() => startCategory('places_india')} color="bg-cyan-600" label="🏛️ Places India" />
           <MenuButton onClick={() => startCategory('important_people')} color="bg-blue-600" label="👮 Important People" />
           <MenuButton onClick={() => startCategory('temples_gods')} color="bg-yellow-600" label="🛕 Temples & Gods" />
+          <MenuButton onClick={() => startCategory('heavy_light')} color="bg-gray-600" label="⚖️ Heavy & Light" />
+          <MenuButton onClick={() => startCategory('family')} color="bg-pink-600" label="👨‍👩‍👧‍👦 Family" />
         </div>
       </div>
     );
