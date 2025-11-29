@@ -9,6 +9,32 @@ const shuffleArray = (array) => {
   return [...array].sort(() => Math.random() - 0.5);
 };
 
+// Question Pool Management
+const getQuestionPool = (category) => {
+  if (typeof window === 'undefined') return [];
+  const saved = localStorage.getItem(`toddlerApp_questionPool_${category}`);
+  return saved ? JSON.parse(saved) : [];
+};
+
+const saveQuestionPool = (category, questions) => {
+  if (typeof window === 'undefined') return;
+  // Keep max 100 questions per category
+  const existing = getQuestionPool(category);
+  const combined = [...existing, ...questions];
+  const unique = combined.filter((q, index, self) => 
+    index === self.findIndex(t => t.q === q.q)
+  );
+  const pool = unique.slice(-100); // Keep last 100 unique questions
+  localStorage.setItem(`toddlerApp_questionPool_${category}`, JSON.stringify(pool));
+};
+
+const getRandomQuestionsFromPool = (category, count = 2) => {
+  const pool = getQuestionPool(category);
+  if (pool.length === 0) return [];
+  const shuffled = shuffleArray([...pool]);
+  return shuffled.slice(0, count);
+};
+
 export default function Home() {
   const [category, setCategory] = useState(null);
   const [questionQueue, setQuestionQueue] = useState([]);
@@ -101,6 +127,54 @@ export default function Home() {
       }
     }
   }, []);
+
+  // Pre-populate question pools in background (for popular categories)
+  useEffect(() => {
+    if (!useAIQuestions || typeof window === 'undefined') return;
+    
+    // Pre-populate pools for most common categories
+    const popularCategories = ['colors', 'counting', 'shapes', 'animals', 'big_small', 'tall_short'];
+    
+    const prePopulatePool = async (catKey) => {
+      const pool = getQuestionPool(catKey);
+      // Only pre-populate if pool is small (< 20 questions)
+      if (pool.length >= 20) return;
+      
+      const categoryTopics = {
+        tall_short: 'tall and short objects',
+        big_small: 'big and small objects',
+        colors: 'colors and colored objects',
+        counting: 'counting numbers 1 to 5',
+        shapes: 'shapes like circle, square, triangle',
+        animals: 'animals and their sounds',
+      };
+      
+      const topic = categoryTopics[catKey] || catKey;
+      
+      try {
+        const response = await fetch('/api/generate-questions', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ category: catKey, topic })
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          if (data.questions && data.questions.length > 0) {
+            saveQuestionPool(catKey, data.questions);
+            console.log('Pre-populated pool for', catKey, 'with', data.questions.length, 'questions');
+          }
+        }
+      } catch (error) {
+        console.log('Background pre-population failed for', catKey, '- will populate on demand');
+      }
+    };
+    
+    // Pre-populate pools one at a time with delays to avoid rate limits
+    popularCategories.forEach((catKey, index) => {
+      setTimeout(() => prePopulatePool(catKey), index * 2000); // 2 second delay between each
+    });
+  }, [useAIQuestions]);
 
   // Auto-speak when question changes for math/alphabet/simple_addition modules
   useEffect(() => {
@@ -260,7 +334,23 @@ export default function Home() {
   };
 
   const generateQuestionsWithAI = async (catKey) => {
-    setIsGeneratingQuestions(true);
+    // Step 1: Get 7 questions from pool immediately (no loading!)
+    const poolQuestions = getRandomQuestionsFromPool(catKey, 7);
+    
+    if (poolQuestions.length >= 5) {
+      // Start game immediately with pool questions (need at least 5 for WIN_CONDITION)
+      console.log('Using questions from pool:', poolQuestions.length);
+      setQuestionQueue(poolQuestions);
+      setCategory(catKey);
+      setScore(0);
+      setShowReward(false);
+      setIsGeneratingQuestions(false); // No loading screen needed!
+    } else {
+      // Not enough in pool, show loading and generate first batch
+      setIsGeneratingQuestions(true);
+    }
+
+    // Step 2: Generate new questions in background (while user plays)
     try {
       const categoryTopics = {
         tall_short: 'tall and short objects',
@@ -321,7 +411,7 @@ export default function Home() {
 
       const topic = categoryTopics[catKey] || catKey;
       
-      console.log('Fetching AI questions for:', catKey);
+      console.log('Generating new AI questions in background for:', catKey);
       const response = await fetch('/api/generate-questions', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -334,39 +424,50 @@ export default function Home() {
         const errorData = await response.json().catch(() => ({}));
         console.error('API error:', errorData);
         
-        // Handle rate limit specifically
-        if (response.status === 429) {
-          console.warn('Rate limit exceeded, using static questions');
-          // Don't throw, fall through to static questions
-          throw new Error('RATE_LIMIT');
+        // If no pool questions were used, fallback to static
+        if (poolQuestions.length === 0) {
+          if (learningModules[catKey]) {
+            const questions = shuffleArray([...learningModules[catKey]]);
+            setQuestionQueue(questions);
+            setCategory(catKey);
+            setScore(0);
+            setShowReward(false);
+          }
         }
-        
-        throw new Error(errorData.error || 'Failed to generate questions');
+        return; // Don't throw, just return (user is already playing)
       }
 
       const data = await response.json();
       console.log('Received AI questions:', data.questions?.length || 0);
       
-      if (!data.questions || data.questions.length === 0) {
-        throw new Error('No questions received from AI');
+      if (data.questions && data.questions.length > 0) {
+        // Save new questions to pool
+        saveQuestionPool(catKey, data.questions);
+        console.log('Saved', data.questions.length, 'new questions to pool');
+        
+        // If we started with pool questions, we can optionally add more to queue
+        // But for now, just save to pool for next time
+      } else if (poolQuestions.length === 0) {
+        // No questions received and no pool, use static
+        if (learningModules[catKey]) {
+          const questions = shuffleArray([...learningModules[catKey]]);
+          setQuestionQueue(questions);
+          setCategory(catKey);
+          setScore(0);
+          setShowReward(false);
+        }
       }
-
-      const questions = shuffleArray(data.questions);
-      console.log('Using AI-generated questions');
-      setQuestionQueue(questions);
-      setCategory(catKey);
-      setScore(0);
-      setShowReward(false);
     } catch (error) {
-      console.error('Error generating questions:', error);
-      console.warn('Falling back to static questions');
-      // Fallback to static questions if AI generation fails
-      if (learningModules[catKey]) {
-        const questions = shuffleArray([...learningModules[catKey]]);
-        setQuestionQueue(questions);
-        setCategory(catKey);
-        setScore(0);
-        setShowReward(false);
+      console.error('Error generating questions in background:', error);
+      // If no pool questions were used, fallback to static
+      if (poolQuestions.length === 0) {
+        if (learningModules[catKey]) {
+          const questions = shuffleArray([...learningModules[catKey]]);
+          setQuestionQueue(questions);
+          setCategory(catKey);
+          setScore(0);
+          setShowReward(false);
+        }
       }
     } finally {
       setIsGeneratingQuestions(false);
@@ -378,7 +479,23 @@ export default function Home() {
     if (useAIQuestions) {
       generateQuestionsWithAI(catKey);
     } else {
-      // Use static questions directly
+      // Static mode: Use coin toss to decide between pool and static
+      const pool = getQuestionPool(catKey);
+      const usePool = pool.length > 0 && Math.random() > 0.5; // 50% chance to use pool
+      
+      if (usePool) {
+        // Randomly select questions from pool
+        const questions = getRandomQuestionsFromPool(catKey, 7);
+        if (questions.length > 0) {
+          setQuestionQueue(questions);
+          setCategory(catKey);
+          setScore(0);
+          setShowReward(false);
+          return;
+        }
+      }
+      
+      // Fallback to static questions
       if (learningModules[catKey]) {
         const questions = shuffleArray([...learningModules[catKey]]);
         setQuestionQueue(questions);
@@ -430,7 +547,18 @@ export default function Home() {
           }));
         } else {
           // Remove current question and move to next
-          setQuestionQueue(prev => prev.slice(1));
+          setQuestionQueue(prev => {
+            const newQueue = prev.slice(1);
+            // If queue is getting low and we're using AI, refill from pool
+            if (newQueue.length <= 1 && useAIQuestions && category) {
+              const moreQuestions = getRandomQuestionsFromPool(category, 5);
+              if (moreQuestions.length > 0) {
+                console.log('Refilling queue with', moreQuestions.length, 'questions from pool');
+                return [...newQueue, ...moreQuestions];
+              }
+            }
+            return newQueue;
+          });
         }
       }, 1000);
     } else {
