@@ -957,18 +957,18 @@ export default function Home() {
         </div>
       )}
 
-      {/* Question Text - Hide for trace_shape_matching */}
-      {category !== 'trace_shape_matching' && (
-        <>
-          <div className="w-full max-w-3xl text-center mb-4 mt-16">
-            {useAIQuestions && (
-              <div className="inline-block px-5 py-2 bg-gradient-to-r from-green-400 to-emerald-400 text-white text-lg font-black rounded-full mb-3 shadow-lg animate-pulse">
-                🤖 AI Generated
-              </div>
-            )}
+      {/* Question Text - Show for trace_shape_matching too */}
+      <div className="w-full max-w-3xl text-center mb-4 mt-16">
+        {useAIQuestions && (
+          <div className="inline-block px-5 py-2 bg-gradient-to-r from-green-400 to-emerald-400 text-white text-lg font-black rounded-full mb-3 shadow-lg animate-pulse">
+            🤖 AI Generated
           </div>
-          <h2 className="text-5xl md:text-7xl font-black mb-8 text-center leading-tight bg-gradient-to-r from-purple-600 via-pink-600 to-red-600 bg-clip-text text-transparent drop-shadow-lg animate-pulse">{currentQ.q}</h2>
-        </>
+        )}
+      </div>
+      {category === 'trace_shape_matching' ? (
+        <h2 className="text-4xl md:text-5xl font-black mb-4 text-center leading-tight bg-gradient-to-r from-purple-600 via-pink-600 to-red-600 bg-clip-text text-transparent drop-shadow-lg">{currentQ.q}</h2>
+      ) : (
+        <h2 className="text-5xl md:text-7xl font-black mb-8 text-center leading-tight bg-gradient-to-r from-purple-600 via-pink-600 to-red-600 bg-clip-text text-transparent drop-shadow-lg animate-pulse">{currentQ.q}</h2>
       )}
       
       {/* Special Display for Counting, Math, Alphabet, and Shape Matching */}
@@ -1034,15 +1034,28 @@ function DisplayContent({ question, isAudioModule, category }) {
   const [imageError, setImageError] = useState(false);
   const showImage = question.displayImage && !imageError;
   
-  // Special display for trace shape matching - only show outline
+  // Special display for trace shape matching - show geometric shape outline
   if (category === 'trace_shape_matching' && question.outline) {
+    // Map outline emojis to larger geometric shapes
+    const shapeMap = {
+      '⬜': '▢', // Square
+      '⭕': '○', // Circle
+      '🔺': '△', // Triangle
+      '▭': '▭', // Rectangle
+      '⭐': '⭐', // Star
+      '❤️': '❤️', // Heart
+    };
+    
+    const displayShape = shapeMap[question.outline] || question.outline;
+    
     return (
       <div className="mb-8 mt-16 p-12 bg-gradient-to-br from-blue-50 to-purple-50 rounded-3xl shadow-2xl border-4 border-blue-300 flex flex-col items-center justify-center">
         <div className="text-9xl md:text-[200px] font-black text-blue-600" style={{ 
           textShadow: '0 0 30px rgba(59, 130, 246, 0.6)',
-          filter: 'drop-shadow(0 6px 12px rgba(0,0,0,0.4))'
+          filter: 'drop-shadow(0 6px 12px rgba(0,0,0,0.4))',
+          fontFamily: 'Arial, sans-serif'
         }}>
-          {question.outline}
+          {displayShape}
         </div>
       </div>
     );
